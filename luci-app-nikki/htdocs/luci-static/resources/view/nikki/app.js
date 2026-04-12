@@ -128,10 +128,6 @@ return view.extend({
         o = s.option(form.Flag, 'enable_hwid', _('Enable HWID'));
         o.rmempty = false;
 
-        o = s.option(form.Value, 'hwid', _('HWID'));
-        o.depends('enable_hwid', '1');
-        o.placeholder = _('Enter HWID');
-
         s = m.section(form.NamedSection, 'procd', 'procd', _('procd Config'));
 
         s.tab('general', _('General Config'));
