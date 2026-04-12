@@ -19,7 +19,7 @@ uci set nikki.config.enable_hwid='1'
 
 # set nikki.config.hwid (auto-generate if not exists)
 [ -z "$(uci -q get nikki.config.hwid)" ] && \
-    uci set nikki.config.hwid="$(hexdump -n 8 -v -e '8/1 "%02x"' /dev/urandom)"
+    uci set nikki.config.hwid="$(cat /proc/sys/kernel/random/uuid 2>/dev/null || hexdump -n 8 -v -e '8/1 "%02x"' /dev/urandom)"
 
 # remove nikki.config.init
 uci del nikki.config.init
