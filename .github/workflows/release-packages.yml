@@ -17,7 +17,7 @@ jobs:
         arch:
           - aarch64_cortex-a53
         branch:
-          - openwrt-25.12
+          - openwrt-24.10
 
     steps:
       - name: checkout
