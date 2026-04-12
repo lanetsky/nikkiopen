@@ -34,11 +34,6 @@ SH_DIR="$HOME_DIR/scripts"
 INCLUDE_SH="$SH_DIR/include.sh"
 FIREWALL_INCLUDE_SH="$SH_DIR/firewall_include.sh"
 
-# nftables
-NFT_DIR="$HOME_DIR/nftables"
-GEOIP_CN_NFT="$NFT_DIR/geoip_cn.nft"
-GEOIP6_CN_NFT="$NFT_DIR/geoip6_cn.nft"
-
 # functions
 format_filesize() {
 	local b; b=1
