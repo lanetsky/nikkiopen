@@ -58,6 +58,12 @@ const callNikkiDebug = rpc.declare({
     expect: { '': {} }
 });
 
+const callNikkiHwid = rpc.declare({
+    object: 'luci.nikki',
+    method: 'hwid',
+    expect: { '': {} }
+});
+
 const homeDir = '/etc/nikki';
 const profilesDir = `${homeDir}/profiles`;
 const subscriptionsDir = `${homeDir}/subscriptions`;
@@ -192,5 +198,9 @@ return baseclass.extend({
 
     debug: function () {
         return callNikkiDebug();
+    },
+
+    hwid: function () {
+        return callNikkiHwid();
     },
 })

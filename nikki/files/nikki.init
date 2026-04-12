@@ -531,15 +531,11 @@ update_subscription() {
 	config_get subscription_url "$subscription_section" "url"
 	config_get subscription_user_agent "$subscription_section" "user_agent"
 	# get hwid config
-	local enable_hwid hwid device_model os_version hwid_headers=""
-	config_get_bool enable_hwid "config" "enable_hwid" 1
-	config_get hwid "config" "hwid"
-	# build hwid headers only if enabled and hwid exists
-	if [ "$enable_hwid" = "1" ] && [ -n "$hwid" ]; then
-		device_model=$(cat /tmp/sysinfo/model 2>/dev/null || echo "OpenWrt")
-		os_version=$(cat /etc/openwrt_version 2>/dev/null || cat /etc/os-release | grep VERSION_ID | cut -d= -f2 | tr -d '"')
-		hwid_headers="-H 'x-hwid: ${hwid}' -H 'x-device-os: Linux' -H 'x-ver-os: ${os_version}' -H 'x-device-model: ${device_model}'"
-	fi
+	local hwid device_os ver_os device_model
+	hwid="$(get_hwid)"
+	device_os="OpenWrt"
+	ver_os="$(get_openwrt_version)"
+	device_model="$(get_device_model)"
 	# reset subscription info
 	uci_remove "nikki" "$subscription_section" "expire" > /dev/null 2>&1
 	uci_remove "nikki" "$subscription_section" "upload" > /dev/null 2>&1
@@ -560,7 +556,13 @@ update_subscription() {
 	# fetch subscription info
 	if [ -n "$subscription_info_url" ]; then
 		log "Profile" "Fetch subscription info."
-		if curl -s -f -m 120 --connect-timeout 15 --retry 3 -L -X GET -A "$subscription_user_agent" $hwid_headers -D "$subscription_info_header_tmpfile" "$subscription_info_url" > /dev/null 2>&1; then
+		if curl -s -f -m 120 --connect-timeout 15 --retry 3 -L -X GET \
+      -A "$subscription_user_agent" \
+      --header "x-hwid: $hwid" \
+      --header "x-device-os: $device_os" \
+      --header "x-ver-os: $ver_os" \
+      --header "x-device-model: $device_model" \
+      -D "$subscription_info_header_tmpfile" "$subscription_info_url" > /dev/null 2>&1; then
 			if [ ! -f "$subscription_info_file" ] && grep -q -i "subscription-userinfo:" "$subscription_info_header_tmpfile"; then
 				subscription_info_file="$subscription_info_header_tmpfile"
 			fi
@@ -568,7 +570,13 @@ update_subscription() {
 	fi
 	# download subscription
 	log "Profile" "Download subscription."
-	if curl -s -f -m 120 --connect-timeout 15 --retry 3 -L -X GET -A "$subscription_user_agent" $hwid_headers -D "$subscription_header_tmpfile" -o "$subscription_tmpfile" "$subscription_url" > /dev/null 2>&1; then
+	if curl -s -f -m 120 --connect-timeout 15 --retry 3 -L -X GET \
+      -A "$subscription_user_agent" \
+      --header "x-hwid: $hwid" \
+      --header "x-device-os: $device_os" \
+      --header "x-ver-os: $ver_os" \
+      --header "x-device-model: $device_model" \
+      -D "$subscription_header_tmpfile" -o "$subscription_tmpfile" "$subscription_url" > /dev/null 2>&1; then
 		log "Profile" "Subscription download successful."
 		if [ ! -f "$subscription_info_file" ] && grep -q -i "subscription-userinfo:" "$subscription_header_tmpfile"; then
 			subscription_info_file="$subscription_header_tmpfile"
