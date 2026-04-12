@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
-PKG_VERSION:=2026.04.08
+PKG_VERSION:=2026.04.12
 PKG_RELEASE:=1
 
 PKG_LICENSE:=GPL3.0+
@@ -71,6 +71,9 @@ define Package/nikki/install
 
 	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d
 	$(INSTALL_DATA) $(CURDIR)/files/nikki.upgrade $(1)/lib/upgrade/keep.d/nikki
+
+	$(INSTALL_DIR) $(1)/usr/libexec
+	$(INSTALL_BIN) $(STAGING_DIR)/usr/libexec/mihomo $(1)/usr/libexec/mihomo
 endef
 
 define Package/nikki/postrm
