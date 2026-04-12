@@ -14,6 +14,12 @@ uci set nikki.mixin.api_secret="$random"
 # set nikki.@authentication[0].password
 uci set nikki.@authentication[0].password="$random"
 
+# set nikki.config.enable_hwid
+uci set nikki.config.enable_hwid='1'
+
+# set nikki.config.hwid
+uci set nikki.config.hwid=''
+
 # remove nikki.config.init
 uci del nikki.config.init
 
