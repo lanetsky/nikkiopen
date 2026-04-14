@@ -24,7 +24,8 @@ define Package/nikki
   CATEGORY:=Network
   TITLE:=Transparent Proxy with Mihomo on OpenWrt.
   URL:=https://github.com/nikkinikki-org
-  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +wget +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy
+  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +wget +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy +mihomo-meta
+  CONFLICTS:=mihomo-alpha
 endef
 
 define Package/nikki/conffiles
@@ -69,8 +70,6 @@ define Package/nikki/install
 	$(INSTALL_DATA) $(CURDIR)/files/nikki.upgrade $(1)/lib/upgrade/keep.d/nikki
 
 	$(INSTALL_DIR) $(1)/usr/libexec
-	$(INSTALL_BIN) $(DL_DIR)/$(MIHOMO_FILE:.gz=) $(1)/usr/libexec/mihomo
-	chmod +x $(1)/usr/libexec/mihomo
 endef
 
 define Package/nikki/postrm
@@ -81,11 +80,6 @@ if [ -z $${IPKG_INSTROOT} ]; then
 		commit firewall
 	EOF
 fi
-endef
-
-define Build/Compile
-	wget -O $(DL_DIR)/$(MIHOMO_FILE) $(MIHOMO_URL)
-	gzip -d $(DL_DIR)/$(MIHOMO_FILE)
 endef
 
 $(eval $(call BuildPackage,nikki))
