@@ -7,7 +7,7 @@ PKG_RELEASE:=1
 PKG_LICENSE:=GPL3.0+
 PKG_MAINTAINER:=Joseph Mory <morytyann@gmail.com>
 
-PKG_BUILD_DEPENDS:=curl/host
+PKG_BUILD_DEPENDS:=wget
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
 
@@ -84,7 +84,7 @@ fi
 endef
 
 define Build/Compile
-	curl -L -o $(DL_DIR)/$(MIHOMO_FILE) $(MIHOMO_URL)
+	wget -O $(DL_DIR)/$(MIHOMO_FILE) $(MIHOMO_URL)
 	gzip -d $(DL_DIR)/$(MIHOMO_FILE)
 endef
 
