@@ -20,7 +20,7 @@ define Package/nikki
   CATEGORY:=Network
   TITLE:=Transparent Proxy with Mihomo on OpenWrt.
   URL:=https://github.com/nikkinikki-org
-  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +wget +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy +mihomo-meta
+  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +curl +wget +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy +mihomo-meta
   CONFLICTS:=mihomo-alpha
 endef
 
