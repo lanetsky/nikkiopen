@@ -84,8 +84,8 @@ fi
 endef
 
 define Build/Compile
-	$(URLCACHE)/$(MIHOMO_FILE) $(MIHOMO_URL)
-	gzip -d $(URLCACHE)/$(MIHOMO_FILE)
+	$(call Download,nikki-mihomo,$(MIHOMO_URL),$(MIHOMO_FILE),)
+	gzip -d $(DL_DIR)/$(MIHOMO_FILE)
 endef
 
 $(eval $(call BuildPackage,nikki))
