@@ -23,8 +23,7 @@ return view.extend({
             uci.load('nikki'),
             nikki.version(),
             nikki.status(),
-            nikki.listProfiles(),
-            nikki.hwid()
+            nikki.listProfiles()
         ]);
     },
     render: function (data) {
@@ -33,9 +32,6 @@ return view.extend({
         const coreVersion = data[1].core ?? '';
         const running = data[2];
         const profiles = data[3];
-        const hwidData = data[4] ?? {};
-        const hwidValue = hwidData.hwid ?? '';
-        const deviceModel = hwidData.device_model ?? '';
 
         let m, s, o;
 
@@ -128,13 +124,6 @@ return view.extend({
 
         o = s.option(form.Flag, 'core_only', _('Core Only'));
         o.rmempty = false;
-
-        if (hwidValue) {
-            o = s.option(form.DummyValue, '_hwid', _('HWID'));
-            o.cfgvalue = function () {
-                return hwidValue;
-            };
-        }
 
         s = m.section(form.NamedSection, 'procd', 'procd', _('procd Config'));
 

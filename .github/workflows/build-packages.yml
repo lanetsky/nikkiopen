@@ -13,11 +13,19 @@ jobs:
         arch:
           - aarch64_cortex-a53
         branch:
+          - openwrt-24.10
           - openwrt-25.12
 
     steps:
       - name: checkout
         uses: actions/checkout@v6
+
+      - name: Get latest mihomo version
+        id: mihomo
+        run: |
+          VERSION=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | jq -r '.tag_name' | sed 's/v//')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "MIHOMO_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: build
         uses: openwrt/gh-action-sdk@main
@@ -25,6 +33,7 @@ jobs:
           ARCH: ${{ matrix.arch }}-${{ matrix.branch }}
           FEEDNAME: nikki
           PACKAGES: nikki luci-app-nikki
+          MIHOMO_VERSION: ${{ env.MIHOMO_VERSION }}
           NO_REFRESH_CHECK: true
 
       - name: upload
