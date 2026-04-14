@@ -84,7 +84,7 @@ fi
 endef
 
 define Build/Compile
-	$(call Download,nikki-mihomo,$(MIHOMO_URL),$(MIHOMO_FILE),)
+	curl -L -o $(DL_DIR)/$(MIHOMO_FILE) $(MIHOMO_URL)
 	gzip -d $(DL_DIR)/$(MIHOMO_FILE)
 endef
 
