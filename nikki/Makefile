@@ -13,10 +13,6 @@ PKG_BUILD_FLAGS:=no-mips16
 
 PKG_BUILD_TIME:=$(shell date -u -Iseconds)
 
-MIHOMO_VERSION ?= 1.19.23
-MIHOMO_URL:=https://github.com/MetaCubeX/mihomo/releases/download/v$(MIHOMO_VERSION)/mihomo-linux-arm64-v8-v$(MIHOMO_VERSION).gz
-MIHOMO_FILE:=mihomo-linux-arm64-v8-v$(MIHOMO_VERSION).gz
-
 include $(INCLUDE_DIR)/package.mk
 
 define Package/nikki
@@ -80,6 +76,9 @@ if [ -z $${IPKG_INSTROOT} ]; then
 		commit firewall
 	EOF
 fi
+endef
+
+define Build/Compile
 endef
 
 $(eval $(call BuildPackage,nikki))
