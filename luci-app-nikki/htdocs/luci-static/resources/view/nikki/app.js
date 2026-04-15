@@ -129,13 +129,6 @@ return view.extend({
         o = s.option(form.Flag, 'core_only', _('Core Only'));
         o.rmempty = false;
 
-        if (hwidValue) {
-            o = s.option(form.DummyValue, '_hwid', _('HWID'));
-            o.cfgvalue = function () {
-                return hwidValue;
-            };
-        }
-
         s = m.section(form.NamedSection, 'procd', 'procd', _('procd Config'));
 
         s.tab('general', _('General Config'));
