@@ -36,7 +36,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.branch }}
           FEEDNAME: nikki
-          PACKAGES: nikki luci-app-nikki mihomo-meta
+          PACKAGES: nikki luci-app-nikki
           MIHOMO_VERSION: ${{ env.MIHOMO_VERSION }}
           INDEX: 1
           KEY_BUILD: ${{ secrets.KEY_BUILD }}
