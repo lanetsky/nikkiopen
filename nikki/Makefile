@@ -1,19 +1,24 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
-PKG_VERSION:=2026.04.08
+PKG_VERSION:=2026.04.15
 PKG_RELEASE:=1
 
 PKG_LICENSE:=GPL3.0+
 PKG_MAINTAINER:=Joseph Mory <morytyann@gmail.com>
 
-PKG_BUILD_DEPENDS:=wget
+PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
 
 PKG_BUILD_TIME:=$(shell date -u -Iseconds)
 
+GO_PKG:=github.com/metacubex/mihomo
+GO_PKG_LDFLAGS_X:=$(GO_PKG)/constant.Version=$(PKG_SOURCE_VERSION) $(GO_PKG)/constant.BuildTime=$(PKG_BUILD_TIME)
+GO_PKG_TAGS:=with_gvisor
+
 include $(INCLUDE_DIR)/package.mk
+include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/nikki
   SECTION:=net
@@ -21,7 +26,6 @@ define Package/nikki
   TITLE:=Transparent Proxy with Mihomo on OpenWrt.
   URL:=https://github.com/nikkinikki-org
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +curl +wget +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy +mihomo-meta
-  CONFLICTS:=mihomo-alpha
 endef
 
 define Package/nikki/conffiles
@@ -64,8 +68,6 @@ define Package/nikki/install
 
 	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d
 	$(INSTALL_DATA) $(CURDIR)/files/nikki.upgrade $(1)/lib/upgrade/keep.d/nikki
-
-	$(INSTALL_DIR) $(1)/usr/libexec
 endef
 
 define Package/nikki/postrm
@@ -79,6 +81,8 @@ fi
 endef
 
 define Build/Compile
+
 endef
 
+$(eval $(call GoBinPackage,nikki))
 $(eval $(call BuildPackage,nikki))

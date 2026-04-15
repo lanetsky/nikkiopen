@@ -34,6 +34,9 @@ SH_DIR="$HOME_DIR/scripts"
 INCLUDE_SH="$SH_DIR/include.sh"
 FIREWALL_INCLUDE_SH="$SH_DIR/firewall_include.sh"
 
+# nftables
+NFT_DIR="$HOME_DIR/nftables"
+
 # functions
 format_filesize() {
 	local b; b=1

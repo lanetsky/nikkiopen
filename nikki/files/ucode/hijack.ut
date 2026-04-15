@@ -612,3 +612,10 @@ table inet nikki {
 	}
 	{% endif %}
 }
+
+{% if (bypass_china_mainland_ip): %}
+include "/etc/nikki/nftables/geoip_cn.nft"
+{% endif %}
+{% if (bypass_china_mainland_ip6): %}
+include "/etc/nikki/nftables/geoip6_cn.nft"
+{% endif %}
