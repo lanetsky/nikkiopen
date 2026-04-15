@@ -1,6 +1,24 @@
 ![GitHub License](https://img.shields.io/github/license/nikkinikki-org/OpenWrt-nikki?style=for-the-badge&logo=github) ![GitHub Tag](https://img.shields.io/github/v/release/nikkinikki-org/OpenWrt-nikki?style=for-the-badge&logo=github) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/nikkinikki-org/OpenWrt-nikki/total?style=for-the-badge&logo=github) ![GitHub Repo stars](https://img.shields.io/github/stars/nikkinikki-org/OpenWrt-nikki?style=for-the-badge&logo=github) [![Telegram](https://img.shields.io/badge/Telegram-gray?style=for-the-badge&logo=telegram)](https://t.me/nikkinikki_org)
 
-English | [中文](README.zh.md)
+English | [Русский](README.ru.md)
+
+---
+
+## Taproom Nikki Fork
+
+This is a forked version of [nikkinikki-org/OpenWrt-nikki](https://github.com/nikkinikki-org/OpenWrt-nikki) with the following modifications:
+
+- **DNS**: 1.1.1.1 + 8.8.8.8 (instead of Chinese 223.5.5.5)
+- **Mode**: tproxy/tproxy (instead of redirect/tun)
+- **HWID**: MAC-based sha256 sent in subscription headers
+- **UI**: "Taproom Nikki" branding
+- **Removed**: geoip files (china IP lists)
+- **Architecture**: only aarch64_cortex-a53
+- **OpenWrt**: 24.10 + 25.12
+
+Download: See [Releases](https://github.com/Taproom-Nikki/OpenWrt-nikki/releases)
+
+---
 
 # Nikki
 
