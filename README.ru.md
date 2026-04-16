@@ -12,11 +12,17 @@
 - **Режим**: tproxy/tproxy (вместо redirect/tun)
 - **HWID**: MAC-based sha256 в заголовках подписки
 - **UI**: "Taproom Nikki" брендинг
-- **Удалено**: geoip файлы (китайские IP списки)
+- **Удалено**: geoip файлы, bypass China, китайские переводы
 - **Архитектура**: только aarch64_cortex-a53
 - **OpenWrt**: 24.10 + 25.12
 
 Скачать: см. [Releases](https://github.com/Taproom-Nikki/OpenWrt-nikki/releases)
+
+### Заметки по поддержке
+
+При обновлении из upstream:
+- Обновлять `.po` файлы переводов в `luci-app-nikki/po/ru/` при изменениях UI
+- Удалять устаревшие строки для удалённых функций
 
 ---
 

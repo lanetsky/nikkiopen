@@ -32,7 +32,7 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.branch }}
           FEEDNAME: nikki
-          PACKAGES: nikki luci-app-nikki
+          PACKAGES: mihomo-meta nikki luci-app-nikki
           MIHOMO_VERSION: ${{ env.MIHOMO_VERSION }}
           NO_REFRESH_CHECK: true
           V: s

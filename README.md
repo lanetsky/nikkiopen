@@ -12,11 +12,17 @@ This is a forked version of [nikkinikki-org/OpenWrt-nikki](https://github.com/ni
 - **Mode**: tproxy/tproxy (instead of redirect/tun)
 - **HWID**: MAC-based sha256 sent in subscription headers
 - **UI**: "Taproom Nikki" branding
-- **Removed**: geoip files (china IP lists)
+- **Removed**: geoip files, bypass China, Chinese translations
 - **Architecture**: only aarch64_cortex-a53
 - **OpenWrt**: 24.10 + 25.12
 
 Download: See [Releases](https://github.com/Taproom-Nikki/OpenWrt-nikki/releases)
+
+### Maintenance Notes
+
+When updating from upstream, remember to:
+- Update `.po` translation files in `luci-app-nikki/po/ru/` if UI changes are made
+- Remove obsolete strings for deleted features
 
 ---
 
