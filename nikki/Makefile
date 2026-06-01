@@ -1,8 +1,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
-PKG_VERSION:=2026.04.08
+PKG_VERSION:=1.19.26
 PKG_RELEASE:=1
+
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/MetaCubeX/mihomo.git
+PKG_SOURCE_VERSION:=v1.19.26
+PKG_MIRROR_HASH:=aa1dcb55236167fa46e4d2e992afbb463fbb13bdb1cb7b3ea967cdc11d4b3d7a
 
 PKG_LICENSE:=GPL3.0+
 PKG_MAINTAINER:=Joseph Mory <morytyann@gmail.com>
@@ -11,11 +18,14 @@ PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
 
+PKG_BUILD_VERSION:=v1.19.26
 PKG_BUILD_TIME:=$(shell date -u -Iseconds)
 
 GO_PKG:=github.com/metacubex/mihomo
-GO_PKG_LDFLAGS_X:=$(GO_PKG)/constant.Version=$(PKG_SOURCE_VERSION) $(GO_PKG)/constant.BuildTime=$(PKG_BUILD_TIME)
+GO_PKG_BUILD_PKG:=github.com/metacubex/mihomo
+GO_PKG_LDFLAGS_X:=$(GO_PKG)/constant.Version=$(PKG_BUILD_VERSION) $(GO_PKG)/constant.BuildTime=$(PKG_BUILD_TIME)
 GO_PKG_TAGS:=with_gvisor
+GO_PKG_INSTALL_BIN_PATH:=/usr/libexec
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
@@ -25,7 +35,9 @@ define Package/nikki
   CATEGORY:=Network
   TITLE:=Transparent Proxy with Mihomo on OpenWrt.
   URL:=https://github.com/nikkinikki-org
-  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +curl +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy +mihomo
+  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +curl +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy
+  ALTERNATIVES:\
+    300:/usr/bin/mihomo:/usr/libexec/mihomo
 endef
 
 define Package/nikki/conffiles
@@ -67,6 +79,8 @@ define Package/nikki/install
 
 	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d
 	$(INSTALL_DATA) $(CURDIR)/files/nikki.upgrade $(1)/lib/upgrade/keep.d/nikki
+
+	$(call GoPackage/Package/Install/Bin,$(1))
 endef
 
 define Package/nikki/postrm
@@ -79,8 +93,9 @@ if [ -z $${IPKG_INSTROOT} ]; then
 fi
 endef
 
-define Build/Compile
-
+define Build/Prepare
+	$(Build/Prepare/Default)
+	$(RM) -r $(PKG_BUILD_DIR)/rules/logic_test
 endef
 
 $(eval $(call GoBinPackage,nikki))
