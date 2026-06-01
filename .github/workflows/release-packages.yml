@@ -24,25 +24,16 @@ jobs:
       - name: checkout
         uses: actions/checkout@v6
 
-      - name: Get latest mihomo version
-        id: mihomo
-        run: |
-          VERSION=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/latest | jq -r '.tag_name' | sed 's/v//')
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "MIHOMO_VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: build
         uses: openwrt/gh-action-sdk@main
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.branch }}
           FEEDNAME: nikki
-          PACKAGES: mihomo-meta nikki luci-app-nikki
-          MIHOMO_VERSION: ${{ env.MIHOMO_VERSION }}
+          PACKAGES: mihomo-alpha mihomo-meta nikki luci-app-nikki
           INDEX: 1
           KEY_BUILD: ${{ secrets.KEY_BUILD }}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           NO_REFRESH_CHECK: true
-          V: s
 
       - name: compress
         run: |
