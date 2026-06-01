@@ -5,10 +5,8 @@ PKG_VERSION:=1.19.26
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/MetaCubeX/mihomo.git
-PKG_SOURCE_VERSION:=v1.19.26
+PKG_SOURCE_SUBDIR:=mihomo-v1.19.26
+PKG_SOURCE_URL:=https://github.com/MetaCubeX/mihomo/archive/refs/tags/v1.19.26.tar.gz
 PKG_MIRROR_HASH:=skip
 
 PKG_LICENSE:=GPL3.0+
