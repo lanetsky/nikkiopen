@@ -23,9 +23,7 @@ PKG_BUILD_TIME:=$(shell date -u -Iseconds)
 
 GO_PKG:=github.com/metacubex/mihomo
 GO_PKG_BUILD_PKG:=github.com/metacubex/mihomo
-GO_PKG_LDFLAGS_X:=$(GO_PKG)/constant.Version=$(PKG_BUILD_VERSION) $(GO_PKG)/constant.BuildTime=$(PKG_BUILD_TIME)
 GO_PKG_TAGS:=with_gvisor
-GO_PKG_INSTALL_BIN_PATH:=/usr/libexec
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
@@ -80,7 +78,8 @@ define Package/nikki/install
 	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d
 	$(INSTALL_DATA) $(CURDIR)/files/nikki.upgrade $(1)/lib/upgrade/keep.d/nikki
 
-	$(call GoPackage/Package/Install/Bin,$(1))
+	$(INSTALL_DIR) $(1)/usr/libexec
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/mihomo $(1)/usr/libexec/mihomo
 endef
 
 define Package/nikki/postrm
@@ -93,10 +92,18 @@ if [ -z $${IPKG_INSTROOT} ]; then
 fi
 endef
 
+define Build/Compile
+	cd $(PKG_BUILD_DIR) && \
+	$(GO_BIN) build \
+		-tags $(GO_PKG_TAGS) \
+		-ldflags "-X $(GO_PKG)/constant.Version=$(PKG_BUILD_VERSION) -X $(GO_PKG)/constant.BuildTime=$(PKG_BUILD_TIME)" \
+		-o $(PKG_BUILD_DIR)/mihomo \
+		$(GO_PKG_BUILD_PKG)
+endef
+
 define Build/Prepare
 	$(Build/Prepare/Default)
 	$(RM) -r $(PKG_BUILD_DIR)/rules/logic_test
 endef
 
-$(eval $(call GoBinPackage,nikki))
 $(eval $(call BuildPackage,nikki))
