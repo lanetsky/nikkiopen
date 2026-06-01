@@ -1,4 +1,6 @@
 name: release-packages
+permissions:
+  contents: write
 
 on:
   workflow_dispatch:
