@@ -16,7 +16,7 @@ This is a forked version of [nikkinikki-org/OpenWrt-nikki](https://github.com/ni
 - **Architecture**: only aarch64_cortex-a53
 - **OpenWrt**: 24.10 + 25.12
 
-Download: See [Releases](https://github.com/Taproom-Nikki/OpenWrt-nikki/releases)
+Download: See [Releases](https://github.com/lanetsky/nikkiopen/releases)
 
 ### Maintenance Notes
 

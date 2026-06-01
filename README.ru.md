@@ -16,7 +16,7 @@
 - **Архитектура**: только aarch64_cortex-a53
 - **OpenWrt**: 24.10 + 25.12
 
-Скачать: см. [Releases](https://github.com/Taproom-Nikki/OpenWrt-nikki/releases)
+Скачать: см. [Releases](https://github.com/lanetsky/nikkiopen/releases)
 
 ### Заметки по поддержке
 
