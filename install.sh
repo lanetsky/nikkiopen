@@ -30,44 +30,42 @@ case "$DISTRIB_RELEASE" in
 		;;
 esac
 
-# feed url
-repository_url="https://nikkinikki.pages.dev"
-feed_url="$repository_url/$branch/$arch/nikki"
+# get latest release tag from GitHub
+echo "get latest release"
+latest_tag=$(curl -s https://api.github.com/repos/lanetsky/nikkiopen/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+if [ -z "$latest_tag" ]; then
+	echo "failed to get latest release"
+	exit 1
+fi
+echo "latest release: $latest_tag"
 
+# download release archive
+archive="nikki_${arch}-${branch}.tar.gz"
+archive_url="https://github.com/lanetsky/nikkiopen/releases/download/${latest_tag}/${archive}"
+echo "download $archive_url"
+wget -O "$archive" "$archive_url" || {
+	echo "failed to download release for $arch/$branch"
+	exit 1
+}
+
+# extract
+echo "extract $archive"
+tar -xzf "$archive" || {
+	echo "failed to extract archive"
+	rm -f "$archive"
+	exit 1
+}
+rm -f "$archive"
+
+# install packages
 if [ -x "/bin/opkg" ]; then
-	# update feeds
-	echo "update feeds"
-	opkg update
-	# get languages
-	echo "get languages"
-	languages=$(opkg list-installed luci-i18n-base-* | cut -d ' ' -f 1 | cut -d '-' -f 4-)
-	# get latest version
-	echo "get latest version"
-	wget -O nikki.version $feed_url/index.json
-	# install ipks
 	echo "install ipks"
-	eval "$(jsonfilter -i nikki.version -e "nikki_version=@['packages']['nikki']" -e "luci_app_nikki_version=@['packages']['luci-app-nikki']")"
-	opkg install "$feed_url/nikki_${nikki_version}_${arch}.ipk"
-	opkg install "$feed_url/luci-app-nikki_${luci_app_nikki_version}_all.ipk"
-	for lang in $languages; do
-		lang_version=$(jsonfilter -i nikki.version -e "@['packages']['luci-i18n-nikki-${lang}']")
-		opkg install "$feed_url/luci-i18n-nikki-${lang}_${lang_version}_all.ipk"
-	done
-	
-	rm -f nikki.version
+	opkg install *.ipk
+	rm -f *.ipk *.json
 elif [ -x "/usr/bin/apk" ]; then
-	# update feeds
-	echo "update feeds"
-	apk update
-	# get languages
-	echo "get languages"
-	languages=$(apk list --installed --manifest luci-i18n-base-* | cut -d ' ' -f 1 | cut -d '-' -f 4-)
-	# install apks from remote repository
-	echo "install apks from remote repository"
-	apk add --allow-untrusted -X $feed_url/packages.adb nikki luci-app-nikki
-	for lang in $languages; do
-		apk add --allow-untrusted -X $feed_url/packages.adb "luci-i18n-nikki-${lang}"
-	done
+	echo "install apks"
+	apk add --allow-untrusted *.apk
+	rm -f *.apk *.adb
 fi
 
-echo "success" 
+echo "success"

@@ -1,4 +1,4 @@
-![GitHub License](https://img.shields.io/github/license/nikkinikki-org/OpenWrt-nikki?style=for-the-badge&logo=github) ![GitHub Tag](https://img.shields.io/github/v/release/nikkinikki-org/OpenWrt-nikki?style=for-the-badge&logo=github) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/nikkinikki-org/OpenWrt-nikki/total?style=for-the-badge&logo=github) ![GitHub Repo stars](https://img.shields.io/github/stars/nikkinikki-org/OpenWrt-nikki?style=for-the-badge&logo=github) [![Telegram](https://img.shields.io/badge/Telegram-gray?style=for-the-badge&logo=telegram)](https://t.me/nikkinikki_org)
+![GitHub License](https://img.shields.io/github/license/lanetsky/nikkiopen?style=for-the-badge&logo=github) ![GitHub Tag](https://img.shields.io/github/v/release/lanetsky/nikkiopen?style=for-the-badge&logo=github) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/lanetsky/nikkiopen/total?style=for-the-badge&logo=github) ![GitHub Repo stars](https://img.shields.io/github/stars/lanetsky/nikkiopen?style=for-the-badge&logo=github)
 
 [English](README.md) | Русский
 
@@ -46,42 +46,19 @@
 
 ## Установка и обновление
 
-### А. Установка из Feed (Рекомендуется)
-
-1. Добавить Feed
-
 ```shell
-# только один раз
-wget -O - https://github.com/nikkinikki-org/OpenWrt-nikki/raw/refs/heads/main/feed.sh | ash
-```
-
-2. Установить
-
-```shell
-# можно из shell или через меню "Пакеты" в LuCI
-# для opkg
-opkg install nikki
-opkg install luci-app-nikki
-# для apk
-apk add nikki
-apk add luci-app-nikki
-```
-
-### Б. Установка из Release
-
-```shell
-wget -O - https://github.com/nikkinikki-org/OpenWrt-nikki/raw/refs/heads/main/install.sh | ash
+wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
 ```
 
 ## Удаление и сброс
 
 ```shell
-wget -O - https://github.com/nikkinikki-org/OpenWrt-nikki/raw/refs/heads/main/uninstall.sh | ash
+wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/uninstall.sh | ash
 ```
 
 ## Как использовать
 
-См. [Wiki](https://github.com/nikkinikki-org/OpenWrt-nikki/wiki)
+См. [Wiki](https://github.com/lanetsky/nikkiopen/wiki)
 
 ## Как это работает
 
@@ -92,20 +69,6 @@ wget -O - https://github.com/nikkinikki-org/OpenWrt-nikki/raw/refs/heads/main/un
 5. Генерация nftables и применение.
 
 Примечание: шаги могут меняться в зависимости от конфигурации.
-
-## Компиляция
-
-```shell
-# добавить feed
-echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> "feeds.conf.default"
-# обновить и установить feeds
-./scripts/feeds update -a
-./scripts/feeds install -a
-# собрать пакет
-make package/luci-app-nikki/compile
-```
-
-Файлы пакетов будут в `bin/packages/your_architecture/nikki`.
 
 ## Зависимости
 
@@ -122,7 +85,7 @@ make package/luci-app-nikki/compile
 
 ## Вклад
 
-[![Contributors](https://contrib.rocks/image?repo=nikkinikki-org/OpenWrt-nikki)](https://github.com/nikkinikki-org/OpenWrt-nikki/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=lanetsky/nikkiopen)](https://github.com/lanetsky/nikkiopen/graphs/contributors)
 
 ## Особая благодарность
 
