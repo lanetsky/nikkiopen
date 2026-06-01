@@ -1,41 +1,21 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
-PKG_VERSION:=1.19.26
+PKG_VERSION:=2026.06.01
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_SUBDIR:=mihomo-v1.19.26
-PKG_SOURCE_URL:=https://github.com/MetaCubeX/mihomo/archive/refs/tags/v1.19.26.tar.gz
-PKG_MIRROR_HASH:=skip
+MIHOMO_VERSION:=1.19.26
 
-NO_REFRESH_CHECK:=
-
-PKG_LICENSE:=GPL3.0+
-PKG_MAINTAINER:=Joseph Mory <morytyann@gmail.com>
-
-PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_BUILD_FLAGS:=no-mips16
-
-PKG_BUILD_VERSION:=v1.19.26
-PKG_BUILD_TIME:=$(shell date -u -Iseconds)
-
-GO_PKG:=github.com/metacubex/mihomo
-GO_PKG_BUILD_PKG:=github.com/metacubex/mihomo
-GO_PKG_LDFLAGS_X:=$(GO_PKG)/constant.Version=$(PKG_BUILD_VERSION) $(GO_PKG)/constant.BuildTime=$(PKG_BUILD_TIME)
-GO_PKG_TAGS:=with_gvisor
-GO_PKG_INSTALL_BIN_PATH:=/usr/libexec
 
 include $(INCLUDE_DIR)/package.mk
-include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/nikki
   SECTION:=net
   CATEGORY:=Network
   TITLE:=Transparent Proxy with Mihomo on OpenWrt.
   URL:=https://github.com/nikkinikki-org
-  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle +curl +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy
+  DEPENDS:=+ca-bundle +curl +yq firewall4 +ip-full +kmod-inet-diag +kmod-nft-socket +kmod-nft-tproxy +kmod-tun +kmod-dummy
   ALTERNATIVES:\
     300:/usr/bin/mihomo:/usr/libexec/mihomo
 endef
@@ -43,6 +23,17 @@ endef
 define Package/nikki/conffiles
 /etc/config/nikki
 /etc/nikki/mixin.yaml
+endef
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	wget -q -O $(PKG_BUILD_DIR)/mihomo.gz \
+		https://github.com/MetaCubeX/mihomo/releases/download/v$(MIHOMO_VERSION)/mihomo-linux-arm64-v8-v$(MIHOMO_VERSION).gz
+	gzip -d $(PKG_BUILD_DIR)/mihomo.gz
+	chmod +x $(PKG_BUILD_DIR)/mihomo
+endef
+
+define Build/Compile
 endef
 
 define Package/nikki/install
@@ -80,7 +71,8 @@ define Package/nikki/install
 	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d
 	$(INSTALL_DATA) $(CURDIR)/files/nikki.upgrade $(1)/lib/upgrade/keep.d/nikki
 
-	$(call GoPackage/Package/Install/Bin,$(1))
+	$(INSTALL_DIR) $(1)/usr/libexec
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/mihomo $(1)/usr/libexec/mihomo
 endef
 
 define Package/nikki/postrm
@@ -93,10 +85,4 @@ if [ -z $${IPKG_INSTROOT} ]; then
 fi
 endef
 
-define Build/Prepare
-	$(Build/Prepare/Default)
-	$(RM) -r $(PKG_BUILD_DIR)/rules/logic_test
-endef
-
-$(eval $(call GoBinPackage,nikki))
 $(eval $(call BuildPackage,nikki))
