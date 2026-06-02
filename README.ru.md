@@ -50,6 +50,12 @@
 wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
 ```
 
+Для установки русского перевода (luci-i18n-nikki-ru):
+
+```shell
+LUCI_I18N=1 wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
+```
+
 ## Удаление и сброс
 
 ```shell

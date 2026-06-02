@@ -50,6 +50,12 @@ Transparent Proxy with Mihomo on OpenWrt.
 wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
 ```
 
+To also install the Russian translation (luci-i18n-nikki-ru):
+
+```shell
+LUCI_I18N=1 wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
+```
+
 ## Uninstall & Reset
 
 ```shell
