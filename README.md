@@ -79,7 +79,6 @@ Note that the steps above may change base on config.
 ## Dependencies
 
 - ca-bundle
-- curl
 - yq
 - firewall4
 - ip-full
