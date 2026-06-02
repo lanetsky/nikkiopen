@@ -60,11 +60,21 @@ rm -f "$archive"
 # install packages
 if [ -x "/bin/opkg" ]; then
 	echo "install ipks"
-	opkg install *.ipk
+	opkg install nikki*.ipk luci-app-nikki*.ipk
+	rm -f nikki*.ipk luci-app-nikki*.ipk
+	if [ -n "$LUCI_I18N" ]; then
+		echo "install luci-i18n-nikki-ru"
+		opkg install luci-i18n-nikki-ru*.ipk
+	fi
 	rm -f *.ipk *.json
 elif [ -x "/usr/bin/apk" ]; then
 	echo "install apks"
-	apk add --allow-untrusted *.apk
+	apk add --allow-untrusted nikki*.apk luci-app-nikki*.apk
+	rm -f nikki*.apk luci-app-nikki*.apk
+	if [ -n "$LUCI_I18N" ]; then
+		echo "install luci-i18n-nikki-ru"
+		apk add --allow-untrusted luci-i18n-nikki-ru*.apk
+	fi
 	rm -f *.apk *.adb
 fi
 
