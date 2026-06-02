@@ -32,7 +32,7 @@ esac
 
 # get latest release tag from GitHub
 echo "get latest release"
-latest_tag=$(curl -s https://api.github.com/repos/lanetsky/nikkiopen/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+latest_tag=$(wget -qO- https://api.github.com/repos/lanetsky/nikkiopen/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
 if [ -z "$latest_tag" ]; then
 	echo "failed to get latest release"
 	exit 1
