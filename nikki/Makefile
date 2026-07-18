@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
-PKG_VERSION:=1.19.28
+PKG_VERSION:=1.19.29
 PKG_RELEASE:=1
 
 PKG_LICENSE:=GPL3.0+
