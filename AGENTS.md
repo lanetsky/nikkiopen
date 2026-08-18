@@ -58,7 +58,7 @@ Compared to upstream defaults:
 - Downloads latest release via GitHub API: `api.github.com/repos/lanetsky/nikkiopen/releases/latest`
 - Extracts `nikki_{arch}-{branch}.tar.gz`, installs ipk/apk
 - `LUCI_I18N=1` env var enables Russian translation install
-- CDN raw.githubusercontent.com caches old versions — workaround: URL with commit hash
+- CDN raw.githubusercontent.com caches old versions — known issue, not yet fixed (users get 404/429 on raw URL)
 - Fallback tag: `v1.19.26-1` if API fails
 
 ## Build / Release
