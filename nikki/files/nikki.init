@@ -252,6 +252,7 @@ start_service() {
 	procd_append_param env QUIC_GO_DISABLE_GSO="$env_disable_quic_go_gso"
 	procd_append_param env QUIC_GO_DISABLE_ECN="$env_disable_quic_go_ecn"
 	procd_append_param env SKIP_SYSTEM_IPV6_CHECK="$env_skip_system_ipv6_check"
+	procd_append_param env TZ="$(cat /etc/TZ)"
 	if [ "$fast_reload" = 1 ]; then
 		procd_set_param reload_signal HUP
 	fi
