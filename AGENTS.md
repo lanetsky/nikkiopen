@@ -7,7 +7,7 @@ Binary-only mihomo package (no Go build), install via one script from router.
 
 ## Current state
 
-- mihomo version: **v1.19.30** (`nikki/Makefile` `PKG_VERSION`)
+- mihomo version: **v1.19.31** (`nikki/Makefile` `PKG_VERSION`)
 - OpenWrt: 24.10 + 25.12, arch: aarch64_cortex-a53
 - Default config: `nikki/files/nikki.conf`
 
