@@ -13,8 +13,8 @@ Binary-only mihomo package (no Go build), install via one script from router.
 
 ## Upstream merge procedure
 
-7 files have custom modifications — merge manually with upstream:
-- `nikki/Makefile` — rewritten to binary-only (no Go/GoBinPackage/ALTERNATIVES), `Build/Prepare` downloads mihomo from GitHub releases
+6 files have custom modifications — merge manually with upstream:
+- `nikki/Makefile` — rewritten to binary-only (no Go/GoBinPackage/ALTERNATIVES), `Build/Prepare` downloads slim mihomo binary from `SaltyMonkey/justclash-core-slim` GitHub releases (`mihomo-linux-arm64-v$(PKG_VERSION).gz`, same tag/asset naming as MetaCubeX)
 - `nikki/files/nikki.conf` — default config with custom defaults (see below)
 - `nikki/files/nikki.init` — uses curl for subscription update (lines 559, 573), passes TZ env var to mihomo (line 255) for correct core log timestamps
 - `nikki/files/scripts/include.sh` — paths and helper functions

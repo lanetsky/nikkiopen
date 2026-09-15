@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nikki
 PKG_VERSION:=1.19.31
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_LICENSE:=GPL3.0+
 PKG_MAINTAINER:=Joseph Mory <morytyann@gmail.com>
@@ -73,7 +73,7 @@ if [ -z $${IPKG_INSTROOT} ]; then
 fi
 endef
 
-MIHOMO_BINARY_URL:=https://github.com/MetaCubeX/mihomo/releases/download/v$(PKG_VERSION)/mihomo-linux-arm64-v$(PKG_VERSION).gz
+MIHOMO_BINARY_URL:=https://github.com/SaltyMonkey/justclash-core-slim/releases/download/v$(PKG_VERSION)/mihomo-linux-arm64-v$(PKG_VERSION).gz
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
