@@ -877,9 +877,17 @@ msgstr "Задержка запуска"
 msgid "Start Immidiately"
 msgstr "Запускать немедленно"
 
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:26
+msgid "Start Service"
+msgstr "Запустить сервис"
+
 #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:40
 msgid "Status"
 msgstr "Статус"
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:44
+msgid "Stop Service"
+msgstr "Остановить сервис"
 
 #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:28
 msgid "Subscription"

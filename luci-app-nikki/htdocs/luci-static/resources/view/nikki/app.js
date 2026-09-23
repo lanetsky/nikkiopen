@@ -17,6 +17,36 @@ function updateStatus(element, running) {
     return element;
 }
 
+function renderServiceToggle(running) {
+    return E('button', {
+        id: 'service_toggle',
+        'class': 'cbi-button ' + (running ? 'cbi-button-negative' : 'cbi-button-action'),
+        'data-running': running ? '1' : '0',
+        'click': function () {
+            const btn = document.getElementById('service_toggle');
+            const isRunning = btn.getAttribute('data-running') === '1';
+            const action = isRunning ? nikki.stop() : nikki.start();
+            btn.disabled = true;
+            return action.catch(function () { }).then(function () {
+                return L.resolveDefault(nikki.status()).then(function (r) {
+                    updateServiceToggle(btn, r);
+                    updateStatus(document.getElementById('core_status'), r);
+                });
+            });
+        }
+    }, [running ? _('Stop Service') : _('Start Service')]);
+}
+
+function updateServiceToggle(element, running) {
+    if (element) {
+        element.textContent = running ? _('Stop Service') : _('Start Service');
+        element.className = 'cbi-button ' + (running ? 'cbi-button-negative' : 'cbi-button-action');
+        element.setAttribute('data-running', running ? '1' : '0');
+        element.disabled = false;
+    }
+    return element;
+}
+
 return view.extend({
     load: function () {
         return Promise.all([
@@ -61,14 +91,13 @@ return view.extend({
         poll.add(function () {
             return L.resolveDefault(nikki.status()).then(function (running) {
                 updateStatus(document.getElementById('core_status'), running);
+                updateServiceToggle(document.getElementById('service_toggle'), running);
             });
         });
 
-        o = s.option(form.Button, 'reload');
-        o.inputstyle = 'action';
-        o.inputtitle = _('Reload Service');
-        o.onclick = function () {
-            return nikki.reload();
+        o = s.option(form.DummyValue, '_service_toggle', _('Service'));
+        o.cfgvalue = function () {
+            return renderServiceToggle(running);
         };
 
         o = s.option(form.Button, 'restart');
@@ -92,9 +121,6 @@ return view.extend({
         };
 
         s = m.section(form.NamedSection, 'config', 'config', _('App Config'));
-
-        o = s.option(form.Flag, 'enabled', _('Enable'));
-        o.rmempty = false;
 
         o = s.option(form.ListValue, 'profile', _('Choose Profile'));
         o.optional = true;

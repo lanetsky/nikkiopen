@@ -18,7 +18,8 @@ Binary-only mihomo package (no Go build), install via one script from router.
 - `nikki/files/nikki.conf` — default config with custom defaults (see below)
 - `nikki/files/nikki.init` — uses curl for subscription update (lines 559, 573), passes TZ env var to mihomo (line 255) for correct core log timestamps
 - `nikki/files/scripts/include.sh` — paths and helper functions
-- `luci-app-nikki/htdocs/luci/resources/view/nikki.js` — LuCI web UI
+- `luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js` — LuCI web UI (custom: "Taproom Nikki" branding, Start/Stop toggle in Status, no Reload button, no Enable checkbox — toggle sets `config.enabled` for autoload)
+- `luci-app-nikki/htdocs/luci-static/resources/tools/nikki.js` — UI helper (RPC: start/stop/restart via UCI apply)
 - `luci-app-nikki/po/ru/*.po` — Russian translations
 
 ~12 files can be copied without changes:

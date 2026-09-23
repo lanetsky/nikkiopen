@@ -96,8 +96,16 @@ return baseclass.extend({
         return (await callRCList('nikki'))?.nikki?.running;
     },
 
-    reload: function () {
-        return callRCInit('nikki', 'reload');
+    start: function () {
+        return uci.set('nikki', 'config', 'enabled', '1')
+            .then(function () { return uci.save('nikki'); })
+            .then(function () { return uci.apply('nikki'); });
+    },
+
+    stop: function () {
+        return uci.set('nikki', 'config', 'enabled', '0')
+            .then(function () { return uci.save('nikki'); })
+            .then(function () { return uci.apply('nikki'); });
     },
 
     restart: function () {
