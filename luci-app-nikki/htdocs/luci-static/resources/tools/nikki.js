@@ -19,6 +19,13 @@ const callRCInit = rpc.declare({
     expect: { '': {} }
 });
 
+const callUciCommit = rpc.declare({
+    object: 'uci',
+    method: 'commit',
+    params: ['config'],
+    expect: { '': {} }
+});
+
 const callNikkiVersion = rpc.declare({
     object: 'luci.nikki',
     method: 'version',
@@ -105,6 +112,7 @@ return baseclass.extend({
     start: function () {
         uci.set('nikki', 'config', 'enabled', '1');
         return uci.save('nikki')
+            .then(function () { return callUciCommit('nikki'); })
             .then(function () { return verifyEnabled('1'); })
             .then(function () { return callRCInit('nikki', 'reload'); });
     },
@@ -112,6 +120,7 @@ return baseclass.extend({
     stop: function () {
         uci.set('nikki', 'config', 'enabled', '0');
         return uci.save('nikki')
+            .then(function () { return callUciCommit('nikki'); })
             .then(function () { return verifyEnabled('0'); })
             .then(function () { return callRCInit('nikki', 'stop'); });
     },

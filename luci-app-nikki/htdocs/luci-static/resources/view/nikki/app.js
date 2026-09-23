@@ -49,6 +49,7 @@ function renderServiceToggle(running) {
                 return L.resolveDefault(nikki.status()).then(function (r) {
                     updateServiceToggle(btn, r);
                     updateStatus(document.getElementById('core_status'), r);
+                    ui.changes.init();
                 });
             });
         }
@@ -63,6 +64,31 @@ function updateServiceToggle(element, running) {
         element.disabled = false;
     }
     return element;
+}
+
+function renderRestartButton() {
+    return E('button', {
+        id: 'restart_button',
+        'class': 'cbi-button',
+        style: 'background-color:#f59e0b; background-image:none; border-color:#f59e0b; color:#fff;',
+        'click': function () {
+            const btn = document.getElementById('restart_button');
+            btn.disabled = true;
+            return nikki.restart().catch(function (e) {
+                ui.addTimeLimitedNotification(
+                    _('Service Error'),
+                    E('span', e ? String(e) : _('Unable to toggle service')),
+                    10000
+                );
+            }).then(function () {
+                return L.resolveDefault(nikki.status()).then(function (r) {
+                    updateStatus(document.getElementById('core_status'), r);
+                    updateServiceToggle(document.getElementById('service_toggle'), r);
+                    btn.disabled = false;
+                });
+            });
+        }
+    }, [_('Restart Service')]);
 }
 
 return view.extend({
@@ -118,11 +144,9 @@ return view.extend({
             return renderServiceToggle(running);
         };
 
-        o = s.option(form.Button, 'restart');
-        o.inputstyle = 'negative';
-        o.inputtitle = _('Restart Service');
-        o.onclick = function () {
-            return nikki.restart();
+        o = s.option(form.DummyValue, '_restart_service', _('Restart Service'));
+        o.cfgvalue = function () {
+            return renderRestartButton();
         };
 
         o = s.option(form.Button, 'update_dashboard');
