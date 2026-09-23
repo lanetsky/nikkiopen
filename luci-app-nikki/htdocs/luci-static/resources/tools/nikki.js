@@ -108,6 +108,10 @@ return baseclass.extend({
             .then(function () { return uci.apply('nikki'); });
     },
 
+    reload: function () {
+        return callRCInit('nikki', 'reload');
+    },
+
     restart: function () {
         return callRCInit('nikki', 'restart');
     },
