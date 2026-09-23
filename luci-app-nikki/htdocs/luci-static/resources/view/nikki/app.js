@@ -7,7 +7,7 @@
 'require tools.nikki as nikki';
 
 function renderStatus(running) {
-    return updateStatus(E('input', { id: 'core_status', style: 'border: unset; font-style: italic; font-weight: bold;', readonly: '' }), running);
+    return updateStatus(E('input', { id: 'core_status', style: 'font-weight: bold;', readonly: '' }), running);
 }
 
 function updateStatus(element, running) {
