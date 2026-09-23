@@ -70,7 +70,7 @@ function renderRestartButton() {
     return E('button', {
         id: 'restart_button',
         'class': 'cbi-button',
-        style: 'background-color:#f59e0b; background-image:none; border-color:#f59e0b; color:#fff;',
+        style: 'border-color:#f59e0b; color:#f59e0b;',
         'click': function () {
             const btn = document.getElementById('restart_button');
             btn.disabled = true;
