@@ -1076,10 +1076,6 @@ msgstr "Обновить"
 msgid "Update At"
 msgstr "Обновлено"
 
-#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:83
-msgid "Update Dashboard"
-msgstr "Обновить панель"
-
 #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:525
 msgid "Update Interval"
 msgstr "Интервал обновления"

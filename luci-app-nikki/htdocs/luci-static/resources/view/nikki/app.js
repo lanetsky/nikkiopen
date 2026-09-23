@@ -139,21 +139,14 @@ return view.extend({
             });
         });
 
-        o = s.option(form.DummyValue, '_service_toggle', _('Service'));
+        o = s.option(form.DummyValue, '_service_buttons');
         o.cfgvalue = function () {
-            return renderServiceToggle(running);
-        };
-
-        o = s.option(form.DummyValue, '_restart_service', _('Restart Service'));
-        o.cfgvalue = function () {
-            return renderRestartButton();
-        };
-
-        o = s.option(form.Button, 'update_dashboard');
-        o.inputstyle = 'positive';
-        o.inputtitle = _('Update Dashboard');
-        o.onclick = function () {
-            return nikki.updateDashboard();
+            return E('div', {
+                'style': 'display:flex; gap:.5em; align-items:center;'
+            }, [
+                renderServiceToggle(running),
+                renderRestartButton()
+            ]);
         };
 
         o = s.option(form.Button, 'open_dashboard');

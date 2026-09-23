@@ -47,10 +47,11 @@ LuCI 24.10 status page in `app.js` — upstream has an Enable checkbox + Reload 
 
 - `app.js`:
   - Remove Enable checkbox (`config.enabled` Flag in App Config) and Reload button (`form.Button 'reload'`).
-  - Status section rows: App/Core Version (readonly), Core Status (input colored green/red via poll), Service (Start/Stop toggle), Restart Service (amber button), Update Dashboard, Open Dashboard.
-  - Toggle button = `form.DummyValue` (`_service_toggle`) + `E('button', { id:'service_toggle', 'data-running': '0'/'1', 'click': ... })`, class `cbi-button cbi-button-action` (STOP state: `cbi-button-negative`), label `Start Service`/`Stop Service`. Poll updates both `service_toggle` and `core_status` (`poll.add`).
+  - Status section rows: App/Core Version (readonly), Core Status (input colored green/red via poll), Service+Restart buttons (one row, no title label), Open Dashboard. No Update Dashboard button (Zashboard updates itself).
+  - Toggle+Restart buttons live in ONE row: `form.DummyValue` (`_service_buttons`, no title) whose `cfgvalue` returns `E('div', { style:'display:flex; gap:.5em; align-items:center;' }, [ renderServiceToggle(running), renderRestartButton() ])`.
+  - Toggle button = `E('button', { id:'service_toggle', 'data-running': '0'/'1', 'click': ... })`, class `cbi-button cbi-button-action` (STOP state: `cbi-button-negative`), label `Start Service`/`Stop Service`. Poll updates both `service_toggle` and `core_status` (`poll.add`).
   - `renderServiceToggle(running)`/`updateServiceToggle(element, running)`; click handler: try/catch → `nikki.stop()/start()`, disable button, errors via `ui.addTimeLimitedNotification(_('Service Error'), ..., 10000)`, then refresh status and call `ui.changes.init()` (clears stale "Unsaved Changes" indicator).
-  - Restart button = `DummyValue` (`_restart_service`) + `E('button', { id:'restart_button', style:'border-color:#f59e0b; color:#f59e0b;' })` → `nikki.restart()`, same error banner + status refresh. NOT `form.Button` (no custom color class available); standard button base with amber outline/text, not a filled button.
+  - Restart button = `E('button', { id:'restart_button', style:'border-color:#f59e0b; color:#f59e0b;' })` → `nikki.restart()`, same error banner + status refresh. NOT `form.Button` (no custom color class available); standard button base with amber outline/text, not a filled button. No `update_dashboard` button and no `nikki.updateDashboard()`/`sol callNikkiAPI` (Zashboard updates itself).
 - `tools/nikki.js`:
   - `status()` → `callRCList('nikki')?.nikki?.running`.
   - `start()`/`stop()` MUST follow this exact order and NOT chain on `uci.set`:

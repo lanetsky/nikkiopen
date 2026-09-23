@@ -46,13 +46,6 @@ const callNikkiUpdateSubscription = rpc.declare({
     expect: { '': {} }
 });
 
-const callNikkiAPI = rpc.declare({
-    object: 'luci.nikki',
-    method: 'api',
-    params: ['method', 'path', 'query', 'body'],
-    expect: { '': {} }
-});
-
 const callNikkiGetIdentifiers = rpc.declare({
     object: 'luci.nikki',
     method: 'get_identifiers',
@@ -143,10 +136,6 @@ return baseclass.extend({
 
     updateSubscription: function (section_id) {
         return callNikkiUpdateSubscription(section_id);
-    },
-
-    updateDashboard: function () {
-        return callNikkiAPI('POST', '/upgrade/ui');
     },
 
     openDashboard: async function () {
