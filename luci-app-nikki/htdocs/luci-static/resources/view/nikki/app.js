@@ -139,14 +139,14 @@ return view.extend({
             });
         });
 
-        o = s.option(form.DummyValue, '_service_buttons');
+        o = s.option(form.DummyValue, '_service_toggle');
         o.cfgvalue = function () {
-            return E('div', {
-                'style': 'display:flex; gap:.5em; align-items:center;'
-            }, [
-                renderServiceToggle(running),
-                renderRestartButton()
-            ]);
+            return renderServiceToggle(running);
+        };
+
+        o = s.option(form.DummyValue, '_restart_service');
+        o.cfgvalue = function () {
+            return renderRestartButton();
         };
 
         o = s.option(form.Button, 'open_dashboard');
