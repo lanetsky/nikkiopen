@@ -26,7 +26,18 @@ function renderServiceToggle(running) {
         'click': function () {
             const btn = document.getElementById('service_toggle');
             const isRunning = btn.getAttribute('data-running') === '1';
-            const action = isRunning ? nikki.stop() : nikki.start();
+            let action;
+            try {
+                action = isRunning ? nikki.stop() : nikki.start();
+            }
+            catch (e) {
+                ui.addTimeLimitedNotification(
+                    _('Service Error'),
+                    E('span', e ? String(e) : _('Unable to toggle service')),
+                    10000
+                );
+                return;
+            }
             btn.disabled = true;
             return action.catch(function (e) {
                 ui.addTimeLimitedNotification(

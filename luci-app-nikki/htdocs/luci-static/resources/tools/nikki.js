@@ -103,15 +103,15 @@ return baseclass.extend({
     },
 
     start: function () {
-        return uci.set('nikki', 'config', 'enabled', '1')
-            .then(function () { return uci.save('nikki'); })
+        uci.set('nikki', 'config', 'enabled', '1');
+        return uci.save('nikki')
             .then(function () { return verifyEnabled('1'); })
             .then(function () { return callRCInit('nikki', 'reload'); });
     },
 
     stop: function () {
-        return uci.set('nikki', 'config', 'enabled', '0')
-            .then(function () { return uci.save('nikki'); })
+        uci.set('nikki', 'config', 'enabled', '0');
+        return uci.save('nikki')
             .then(function () { return verifyEnabled('0'); })
             .then(function () { return callRCInit('nikki', 'stop'); });
     },
