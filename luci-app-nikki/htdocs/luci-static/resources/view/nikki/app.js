@@ -2,6 +2,7 @@
 'require form';
 'require view';
 'require uci';
+'require ui';
 'require poll';
 'require tools.nikki as nikki';
 
@@ -27,7 +28,13 @@ function renderServiceToggle(running) {
             const isRunning = btn.getAttribute('data-running') === '1';
             const action = isRunning ? nikki.stop() : nikki.start();
             btn.disabled = true;
-            return action.catch(function () { }).then(function () {
+            return action.catch(function (e) {
+                ui.addTimeLimitedNotification(
+                    _('Service Error'),
+                    E('span', e ? String(e) : _('Unable to toggle service')),
+                    10000
+                );
+            }).then(function () {
                 return L.resolveDefault(nikki.status()).then(function (r) {
                     updateServiceToggle(btn, r);
                     updateStatus(document.getElementById('core_status'), r);

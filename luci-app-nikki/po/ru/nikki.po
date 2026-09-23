@@ -881,6 +881,14 @@ msgstr "Запускать немедленно"
 msgid "Start Service"
 msgstr "Запустить сервис"
 
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:29
+msgid "Service Error"
+msgstr "Ошибка сервиса"
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:31
+msgid "Unable to toggle service"
+msgstr "Не удалось переключить сервис"
+
 #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js:40
 msgid "Status"
 msgstr "Статус"

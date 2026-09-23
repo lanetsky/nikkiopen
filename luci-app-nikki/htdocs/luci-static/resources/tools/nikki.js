@@ -79,6 +79,12 @@ const coreLogPath = `${logDir}/core.log`;
 const debugLogPath = `${logDir}/debug.log`;
 const nftDir = `${homeDir}/nftables`;
 
+function verifyEnabled(expected) {
+    const actual = uci.get('nikki', 'config', 'enabled');
+    if (actual !== expected)
+        return Promise.reject('enabled check failed, expected ' + expected + ' got ' + actual);
+}
+
 return baseclass.extend({
     homeDir: homeDir,
     profilesDir: profilesDir,
@@ -99,13 +105,15 @@ return baseclass.extend({
     start: function () {
         return uci.set('nikki', 'config', 'enabled', '1')
             .then(function () { return uci.save('nikki'); })
-            .then(function () { return uci.apply('nikki'); });
+            .then(function () { return verifyEnabled('1'); })
+            .then(function () { return callRCInit('nikki', 'reload'); });
     },
 
     stop: function () {
         return uci.set('nikki', 'config', 'enabled', '0')
             .then(function () { return uci.save('nikki'); })
-            .then(function () { return uci.apply('nikki'); });
+            .then(function () { return verifyEnabled('0'); })
+            .then(function () { return callRCInit('nikki', 'stop'); });
     },
 
     reload: function () {
