@@ -85,7 +85,6 @@ return view.extend({
         o.value('local', _('Local'));
 
         o = s.option(form.Flag, 'auto_update', _('Auto Update'));
-        o.editable = true;
         o.default = '0';
 
         o = s.option(form.ListValue, 'auto_update_mode', _('Update Mode'));
