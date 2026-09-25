@@ -85,7 +85,7 @@ return view.extend({
         o.value('local', _('Local'));
 
         o = s.option(form.Flag, 'auto_update', _('Auto Update'));
-        o.modalonly = false;
+        o.editable = true;
         o.default = '0';
 
         o = s.option(form.ListValue, 'auto_update_mode', _('Update Mode'));
@@ -98,7 +98,7 @@ return view.extend({
         o.modalonly = true;
         o.rmempty = false;
         o.default = '6';
-        o.depends({ auto_update_mode: 'hours', auto_update: '1' });
+        o.depends('auto_update_mode', 'hours');
 
         return m.render();
     }

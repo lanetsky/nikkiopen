@@ -83,7 +83,7 @@ Re-apply after upstream merge. Per-subscription config (`config subscription` se
 - `auto_update_mode` (`hours` | `subscription`) — weekly checker `auto_update_subscriptions` (cron `17 * * * *`, marker `#nikki subscription auto update`):
   - `hours`: interval = `auto_update_period` hours (default 6, min behavior by math)
   - `subscription`: interval = `update_interval` seconds parsed from the `profile-update-interval:` response header (value in hours, Remnawave/Marzban convention; stored `N*3600`) — fallback to `auto_update_period` when header missing
-- `auto_update_period` (6) — manual hours, UI depends on `auto_update_mode=hours` AND `auto_update=1`
+- `auto_update_period` (6) — manual hours, UI shows in modal when `auto_update_mode=hours` (grid Auto Update Flag is `editable=true` so it renders as a real checkbox in the table and also appears in the modal)
 - Checker compares `now >= update + interval` using the per-subscription `update` timestamp; when due → `update_subscription $sid` (its `uci_commit` triggers procd reload → new config applied). Stored options `update`, `expire`, `upload`, `download`, `total`, `used`, `avaliable`, `success`, `update_interval` are reset at the start of `update_subscription`.
 
 Verify header unit on Remnawave: `curl -sI "<sub-url>" -A mihomo` → `Profile-Update-Interval: 72` (hours). Update interval is logged to app.log on success: "Subscription update interval from profile-update-interval header: N h (…s)."
