@@ -699,6 +699,26 @@ msgstr "Порт"
 msgid "Prefer"
 msgstr "Предпочтение"
 
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:84
+msgid "Auto Update"
+msgstr "Автообновление"
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:87
+msgid "Update Mode"
+msgstr "Режим обновления"
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:90
+msgid "Update Period (hours)"
+msgstr "Период обновления (часы)"
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:91-92
+msgid "Fixed interval (hours)"
+msgstr "Фиксированный интервал (часы)"
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:93-94
+msgid "From subscription (profile-update-interval)"
+msgstr "Из подписки (profile-update-interval)"
+
 #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:556
 msgid "Process Name"
 msgstr "Имя процесса"

@@ -9,6 +9,7 @@ PROG="/usr/bin/mihomo"
 . "$IPKG_INSTROOT/etc/nikki/scripts/include.sh"
 
 extra_command 'update_subscription' 'Update subscription by section id'
+extra_command 'auto_update_subscriptions' 'Auto update subscriptions by schedule'
 extra_command 'clear_logs' 'Clear logs if size exceeds the limit'
 
 boot_func() {
@@ -274,6 +275,18 @@ start_service() {
 	if [ "$log_scheduled_clear" = 1 ] && [ -n "$log_scheduled_clear_cron" ]; then
 		log "App" "Set log scheduled clear."
 		echo "$log_scheduled_clear_cron /etc/init.d/nikki clear_logs #nikki log scheduled clear" >> "/etc/crontabs/root"
+		reload_cron=1
+	fi
+	local need_auto_update; need_auto_update=0
+	check_subscription_auto_update() {
+		local au
+		config_get_bool au "$1" "auto_update" 0
+		[ "$au" = 1 ] && need_auto_update=1
+	}
+	config_foreach check_subscription_auto_update subscription
+	if [ "$need_auto_update" = 1 ]; then
+		log "App" "Set subscription auto update."
+		echo "17 * * * * /etc/init.d/nikki auto_update_subscriptions #nikki subscription auto update" >> "/etc/crontabs/root"
 		reload_cron=1
 	fi
 	if [ "$reload_cron" = 1 ]; then
@@ -545,6 +558,7 @@ update_subscription() {
 	uci_remove "nikki" "$subscription_section" "used" > /dev/null 2>&1
 	uci_remove "nikki" "$subscription_section" "avaliable" > /dev/null 2>&1
 	uci_remove "nikki" "$subscription_section" "update" > /dev/null 2>&1
+	uci_remove "nikki" "$subscription_section" "update_interval" > /dev/null 2>&1
 	uci_remove "nikki" "$subscription_section" "success" > /dev/null 2>&1
 	# update subscription
 	log "Profile" "Update subscription: $subscription_name."
@@ -602,6 +616,8 @@ update_subscription() {
 			subscription_upload=$(grep -i "subscription-userinfo: " "$subscription_info_file" | grep -i -o -E "upload=[[:digit:]]+" | cut -d '=' -f 2)
 			subscription_download=$(grep -i "subscription-userinfo: " "$subscription_info_file" | grep -i -o -E "download=[[:digit:]]+" | cut -d '=' -f 2)
 			subscription_total=$(grep -i "subscription-userinfo: " "$subscription_info_file" | grep -i -o -E "total=[[:digit:]]+" | cut -d '=' -f 2)
+			local subscription_update_interval
+			subscription_update_interval=$(grep -i "^profile-update-interval:" "$subscription_info_file" | grep -i -o -E "[[:digit:]]+" | head -1)
 			if [ -n "$subscription_upload" ] && [ -n "$subscription_download" ]; then
 				subscription_used=$((subscription_upload + subscription_download))
 				if [ -n "$subscription_total" ]; then
@@ -627,6 +643,10 @@ update_subscription() {
 			if [ -n "$subscription_avaliable" ]; then
 				uci_set "nikki" "$subscription_section" "avaliable" "$(format_filesize "$subscription_avaliable")"
 			fi
+			if [ -n "$subscription_update_interval" ] && [ "$subscription_update_interval" -gt 0 ]; then
+				uci_set "nikki" "$subscription_section" "update_interval" "$((subscription_update_interval * 3600))"
+				log "Profile" "Subscription update interval from profile-update-interval header: ${subscription_update_interval} h ($((subscription_update_interval * 3600)) s)."
+			fi
 		fi
 		uci_set "nikki" "$subscription_section" "update" "$(date "+%Y-%m-%d %H:%M:%S")"
 		uci_set "nikki" "$subscription_section" "success" "1"
@@ -644,4 +664,53 @@ update_subscription() {
 		rm -f "$subscription_tmpfile"
 	fi
 	uci_commit "nikki"
+}
+
+auto_update_subscription() {
+	local subscription_section; subscription_section="$1"
+	local auto_update auto_update_mode auto_update_period subscription_update_interval update_str
+	config_get_bool auto_update "$subscription_section" "auto_update" 0
+	[ "$auto_update" = 1 ] || return
+	config_get auto_update_mode "$subscription_section" "auto_update_mode" "hours"
+	config_get auto_update_period "$subscription_section" "auto_update_period" "6"
+	auto_update_period="${auto_update_period:-6}"
+	local interval_sec
+	if [ "$auto_update_mode" = "subscription" ]; then
+		config_get subscription_update_interval "$subscription_section" "update_interval"
+		if [ -z "$subscription_update_interval" ] || [ "$subscription_update_interval" -le 0 ]; then
+			subscription_update_interval=$((auto_update_period * 3600))
+		fi
+		interval_sec="$subscription_update_interval"
+	else
+		interval_sec=$((auto_update_period * 3600))
+	fi
+	if [ -z "$interval_sec" ] || [ "$interval_sec" -le 0 ]; then
+		return
+	fi
+	local now last_epoch due
+	now=$(date +%s)
+	last_epoch=0
+	config_get update_str "$subscription_section" "update"
+	if [ -n "$update_str" ]; then
+		last_epoch=$(date -d "$update_str" +%s 2> /dev/null)
+	fi
+	[ -z "$last_epoch" ] && last_epoch=0
+	due=$((last_epoch + interval_sec))
+	if [ "$now" -ge "$due" ]; then
+		log "Profile" "Auto update subscription ${subscription_section} (interval ${interval_sec} s, next by $(date -d "@$due" "+%Y-%m-%d %H:%M:%S"))."
+		update_subscription "$subscription_section"
+	fi
+}
+
+auto_update_subscriptions() {
+	# load config
+	config_load nikki
+	# check if enabled
+	local enabled
+	config_get_bool enabled "config" "enabled" 0
+	if [ "$enabled" = 0 ]; then
+		return
+	fi
+	# auto update subscriptions
+	config_foreach auto_update_subscription subscription
 }

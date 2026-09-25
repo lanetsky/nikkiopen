@@ -752,6 +752,26 @@ msgstr ""
 msgid "Remote"
 msgstr ""
 
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:88
+msgid "Auto Update"
+msgstr ""
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:89
+msgid "Update Mode"
+msgstr ""
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:90
+msgid "Update Period (hours)"
+msgstr ""
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:91
+msgid "Fixed interval (hours)"
+msgstr ""
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:93
+msgid "From subscription (profile-update-interval)"
+msgstr ""
+
 #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/proxy.js:196
 msgid "Reserved IP"
 msgstr ""

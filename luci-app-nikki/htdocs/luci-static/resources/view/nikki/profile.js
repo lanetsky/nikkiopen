@@ -84,6 +84,22 @@ return view.extend({
         o.value('remote', _('Remote'));
         o.value('local', _('Local'));
 
+        o = s.option(form.Flag, 'auto_update', _('Auto Update'));
+        o.modalonly = false;
+        o.default = '0';
+
+        o = s.option(form.ListValue, 'auto_update_mode', _('Update Mode'));
+        o.modalonly = true;
+        o.default = 'hours';
+        o.value('hours', _('Fixed interval (hours)'));
+        o.value('subscription', _('From subscription (profile-update-interval)'));
+
+        o = s.option(form.Value, 'auto_update_period', _('Update Period (hours)'));
+        o.modalonly = true;
+        o.rmempty = false;
+        o.default = '6';
+        o.depends({ auto_update_mode: 'hours', auto_update: '1' });
+
         return m.render();
     }
 });

@@ -7,7 +7,7 @@ Binary-only mihomo package (no Go build), install via one script from router.
 
 ## Current state
 
-- mihomo version: **v1.19.31** (`nikki/Makefile` `PKG_VERSION`), current release `v1.19.31-4` (`PKG_RELEASE`)
+- mihomo version: **v1.19.31** (`nikki/Makefile` `PKG_VERSION`), current release `v1.19.31-9` (`PKG_RELEASE`)
 - OpenWrt: 24.10 + 25.12, arch: aarch64_cortex-a53
 - Default config: `nikki/files/nikki.conf`
 
@@ -16,11 +16,12 @@ Binary-only mihomo package (no Go build), install via one script from router.
 6 files have custom modifications — merge manually with upstream:
 - `nikki/Makefile` — rewritten to binary-only (no Go/GoBinPackage/ALTERNATIVES), `Build/Prepare` downloads slim mihomo binary from `SaltyMonkey/justclash-core-slim` GitHub releases (`mihomo-linux-arm64-v$(PKG_VERSION).gz`, same tag/asset naming as MetaCubeX)
 - `nikki/files/nikki.conf` — default config with custom defaults (see below)
-- `nikki/files/nikki.init` — uses curl for subscription update (lines 559, 573), passes TZ env var to mihomo (line 255) for correct core log timestamps
+- `nikki/files/nikki.init` — uses curl for subscription update (lines 559, 573), passes TZ env var to mihomo (line 255) for correct core log timestamps; auto subscription update: `auto_update_subscriptions` extra_command + cron entry in `start_service` (`17 * * * *`, marker `#nikki subscription auto update`), parses `profile-update-interval:` header (hours → seconds) in `update_subscription`
 - `nikki/files/scripts/include.sh` — paths and helper functions
 - `luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js` — LuCI web UI (custom: "Taproom Nikki" branding, Start/Stop toggle in Status, no Reload button, no Enable checkbox — toggle sets+commits `config.enabled`, Restart = amber button; see "UI toggle customizations" below)
 - `luci-app-nikki/htdocs/luci-static/resources/tools/nikki.js` — UI helper (RPC: start/stop/restart; see "UI toggle customizations" below — uci.set/commit quirks)
-- `luci-app-nikki/po/ru/*.po` — Russian translations (incl. Start/Stop Service, Service Error strings)
+- `luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js` — Subscription grid: adds `auto_update` Flag column + modal `auto_update_mode` (hours | subscription) + modal `auto_update_period` (hours, depends mode=hours AND auto_update=1); see "Auto subscription update" below
+- `luci-app-nikki/po/ru/*.po` — Russian translations (incl. Start/Stop Service, Service Error strings; auto-update strings)
 
 ~12 files can be copied without changes:
 - `nikki/files/nikki.upgrade`
@@ -74,6 +75,18 @@ Compared to upstream defaults:
 - `config proxy`: `bypass_dscp='4'` (unchanged from upstream)
 - `config router_access_control`: bypass for dnsmasq/ftp/logd/nobody/ntp/ubus users+groups, adguardhome/aria2/dnsmasq/netbird/qbittorrent/sysntpd/tailscale/zerotier cgroups
 - `config lan_access_control`: default allow all, user can add per-IP bypasses
+
+## Auto subscription update
+
+Re-apply after upstream merge. Per-subscription config (`config subscription` section):
+- `auto_update` (0) — enable auto-update for that subscription
+- `auto_update_mode` (`hours` | `subscription`) — weekly checker `auto_update_subscriptions` (cron `17 * * * *`, marker `#nikki subscription auto update`):
+  - `hours`: interval = `auto_update_period` hours (default 6, min behavior by math)
+  - `subscription`: interval = `update_interval` seconds parsed from the `profile-update-interval:` response header (value in hours, Remnawave/Marzban convention; stored `N*3600`) — fallback to `auto_update_period` when header missing
+- `auto_update_period` (6) — manual hours, UI depends on `auto_update_mode=hours` AND `auto_update=1`
+- Checker compares `now >= update + interval` using the per-subscription `update` timestamp; when due → `update_subscription $sid` (its `uci_commit` triggers procd reload → new config applied). Stored options `update`, `expire`, `upload`, `download`, `total`, `used`, `avaliable`, `success`, `update_interval` are reset at the start of `update_subscription`.
+
+Verify header unit on Remnawave: `curl -sI "<sub-url>" -A mihomo` → `Profile-Update-Interval: 72` (hours). Update interval is logged to app.log on success: "Subscription update interval from profile-update-interval header: N h (…s)."
 
 ## install.sh
 
