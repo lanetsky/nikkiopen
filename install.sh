@@ -33,7 +33,7 @@ esac
 # get latest release tag from GitHub
 echo "get latest release"
 latest_tag=$(wget -qO- https://api.github.com/repos/lanetsky/nikkiopen/releases/latest 2>/dev/null | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
-[ -z "$latest_tag" ] && latest_tag="v1.19.26-1"
+[ -z "$latest_tag" ] && latest_tag="v1.19.32-2"
 echo "latest release: $latest_tag"
 
 # download release archive

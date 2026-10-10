@@ -19,9 +19,21 @@ const callRCInit = rpc.declare({
     expect: { '': {} }
 });
 
+const callFileWrite = rpc.declare({
+    object: 'file',
+    method: 'write',
+    params: ['path', 'data', 'append', 'mode']
+});
+
 const callNikkiVersion = rpc.declare({
     object: 'luci.nikki',
     method: 'version',
+    expect: { '': {} }
+});
+
+const callNikkiHwid = rpc.declare({
+    object: 'luci.nikki',
+    method: 'hwid',
     expect: { '': {} }
 });
 
@@ -55,12 +67,6 @@ const callNikkiGetIdentifiers = rpc.declare({
 const callNikkiDebug = rpc.declare({
     object: 'luci.nikki',
     method: 'debug',
-    expect: { '': {} }
-});
-
-const callNikkiHwid = rpc.declare({
-    object: 'luci.nikki',
-    method: 'hwid',
     expect: { '': {} }
 });
 
@@ -102,6 +108,34 @@ return baseclass.extend({
 
     restart: function () {
         return callRCInit('nikki', 'restart');
+    },
+
+    writefile: function (path, data, mode) {
+        data = (data != null) ? String(data) : '';
+        mode = (mode != null) ? mode : 0o644;
+
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        const chunkSize = 8 * 1024;
+
+        const bytes = encoder.encode(data);
+
+        if (bytes.length <= chunkSize) {
+            return callFileWrite(path, data, false, mode);
+        }
+
+        let promise = Promise.resolve();
+        for(let offset = 0; offset < bytes.length; offset += chunkSize) {
+            const chunkStart = offset;
+            const chunkEnd = Math.min(offset + chunkSize, bytes.length);
+            const isLastChunk = chunkEnd === bytes.length;
+            const chunkBytes = bytes.slice(chunkStart, chunkEnd);
+            const chunk = decoder.decode(chunkBytes, { stream: !isLastChunk });
+            const append = offset > 0;
+            promise = promise.then(() => callFileWrite(path, chunk, append, mode));
+        }
+
+        return promise;
     },
 
     version: function () {
@@ -189,11 +223,11 @@ return baseclass.extend({
     },
 
     clearAppLog: function () {
-        return fs.write(this.appLogPath);
+        return this.writefile(this.appLogPath, '');
     },
 
     clearCoreLog: function () {
-        return fs.write(this.coreLogPath);
+        return this.writefile(this.coreLogPath, '');
     },
 
     debug: function () {
