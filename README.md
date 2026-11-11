@@ -47,19 +47,34 @@ Transparent Proxy with Mihomo on OpenWrt.
 ## Install & Update
 
 ```shell
-wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
+wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
 ```
 
 To also install the Russian translation (luci-i18n-nikki-ru):
 
 ```shell
-LUCI_I18N=1 wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
+LUCI_I18N=1 wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+```
+
+### Troubleshooting (download timeout)
+
+If the command above hangs or times out, use one of the alternatives:
+
+```shell
+# curl (often works better than busybox wget on routers)
+curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+
+# force IPv4 (busybox wget may hang on broken IPv6 routes)
+curl -4 -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+
+# jsDelivr CDN mirror
+wget -O - https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh | ash
 ```
 
 ## Uninstall & Reset
 
 ```shell
-wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/uninstall.sh | ash
+wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/uninstall.sh | ash
 ```
 
 ## How To Use

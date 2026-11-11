@@ -30,29 +30,67 @@ case "$DISTRIB_RELEASE" in
 		;;
 esac
 
-# get latest release tag from GitHub
-echo "get latest release"
-latest_tag=$(wget -qO- https://api.github.com/repos/lanetsky/nikkiopen/releases/latest 2>/dev/null | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
-[ -z "$latest_tag" ] && latest_tag="v1.19.34-1"
+# download helper: wget first, curl as fallback
+download() {
+	url="$1"
+	out="$2"
+	if command -v wget >/dev/null 2>&1; then
+		wget -q -T 30 -t 3 -O "$out" "$url" && return 0
+	fi
+	if command -v curl >/dev/null 2>&1; then
+		curl -fsSL --connect-timeout 15 --max-time 900 -o "$out" "$url" && return 0
+	fi
+	return 1
+}
+
+# fetch text to stdout
+fetch() {
+	url="$1"
+	if command -v wget >/dev/null 2>&1; then
+		wget -q -T 20 -t 2 -O - "$url" && return 0
+	fi
+	if command -v curl >/dev/null 2>&1; then
+		curl -fsSL --connect-timeout 15 --max-time 60 "$url" && return 0
+	fi
+	return 1
+}
+
+# release sources: latest release assets first, pinned tag as fallback
+fallback_tag="v1.19.34-1"
+base_latest="https://github.com/lanetsky/nikkiopen/releases/latest/download"
+base_tag="https://github.com/lanetsky/nikkiopen/releases/download/${fallback_tag}"
+
+# get latest release tag (informational only)
+latest_tag=$(fetch "https://api.github.com/repos/lanetsky/nikkiopen/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+[ -z "$latest_tag" ] && latest_tag="$fallback_tag"
 echo "latest release: $latest_tag"
 
 # download release archive
 archive="nikki_${arch}-${branch}.tar.gz"
-archive_url="https://github.com/lanetsky/nikkiopen/releases/download/${latest_tag}/${archive}"
-echo "download $archive_url"
-wget -O "$archive" "$archive_url" || {
+archive_file="nikki_archive.tar.gz"
+got=
+for url in "${base_latest}/${archive}" "${base_tag}/${archive}"; do
+	echo "download $url"
+	if download "$url" "$archive_file"; then
+		got=1
+		break
+	fi
+	echo "failed, trying next source"
+	rm -f "$archive_file"
+done
+if [ -z "$got" ]; then
 	echo "failed to download release for $arch/$branch"
 	exit 1
-}
+fi
 
 # extract
 echo "extract $archive"
-tar -xzf "$archive" || {
+tar -xzf "$archive_file" || {
 	echo "failed to extract archive"
-	rm -f "$archive"
+	rm -f "$archive_file"
 	exit 1
 }
-rm -f "$archive"
+rm -f "$archive_file"
 
 # install packages
 if [ -x "/bin/opkg" ]; then

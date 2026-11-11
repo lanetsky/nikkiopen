@@ -67,7 +67,9 @@ Compared to upstream defaults:
 - Downloads latest release via GitHub API: `api.github.com/repos/lanetsky/nikkiopen/releases/latest`
 - Extracts `nikki_{arch}-{branch}.tar.gz`, installs ipk/apk
 - `LUCI_I18N=1` env var enables Russian translation install
-- CDN raw.githubusercontent.com caches old versions — known issue, not yet fixed (users get 404/429 on raw URL)
+- Installer must NOT depend on `raw.githubusercontent.com` (timeout/blocked for many users) — `install.sh`/`uninstall.sh` are attached to release assets, install cmd: `https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh`
+- `install.sh` resolves the archive via `/releases/latest/download/` (no hard dependency on `api.github.com`), falls back to pinned tag `v1.19.34-1`; wget first, curl fallback, `-T 30 -t 3` timeouts
+- CDN jsDelivr mirror documented in README as fallback: `https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh`
 - Fallback tag: `v1.19.34-1` if API fails
 
 ## Build / Release

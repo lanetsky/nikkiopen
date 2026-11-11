@@ -47,19 +47,34 @@
 ## Установка и обновление
 
 ```shell
-wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
+wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
 ```
 
 Для установки русского перевода (luci-i18n-nikki-ru):
 
 ```shell
-LUCI_I18N=1 wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/install.sh | ash
+LUCI_I18N=1 wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+```
+
+### Если скачивание зависает (таймаут)
+
+Если команда выше зависает или отваливается по таймауту, используй один из вариантов:
+
+```shell
+# curl (на роутерах часто работает стабильнее, чем busybox wget)
+curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+
+# принудительно IPv4 (busybox wget может зависать на нерабочих IPv6-маршрутах)
+curl -4 -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+
+# зеркало через CDN jsDelivr
+wget -O - https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh | ash
 ```
 
 ## Удаление и сброс
 
 ```shell
-wget -O - https://github.com/lanetsky/nikkiopen/raw/refs/heads/main/uninstall.sh | ash
+wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/uninstall.sh | ash
 ```
 
 ## Как использовать

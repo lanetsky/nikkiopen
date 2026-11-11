@@ -51,6 +51,15 @@ jobs:
           files: |
             nikki_${{ matrix.arch }}-${{ matrix.branch }}.tar.gz
 
+      - if: github.event_name == 'push' && startsWith(github.ref_name, 'v') && matrix.branch == 'openwrt-24.10'
+        name: release scripts
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            install.sh
+            uninstall.sh
+          overwrite_files: true
+
       - name: upload
         uses: actions/upload-artifact@v7
         with:
