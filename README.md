@@ -47,34 +47,40 @@ Transparent Proxy with Mihomo on OpenWrt.
 ## Install & Update
 
 ```shell
+curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+```
+
+If `curl` is not available on your router, use `wget` instead:
+
+```shell
 wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
 ```
 
 To also install the Russian translation (luci-i18n-nikki-ru):
 
 ```shell
-LUCI_I18N=1 wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+LUCI_I18N=1 curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
 ```
 
 ### Troubleshooting (download timeout)
 
-If the command above hangs or times out, use one of the alternatives:
+If the download hangs or times out, try one of the alternatives:
 
 ```shell
-# curl (often works better than busybox wget on routers)
-curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
-
-# force IPv4 (busybox wget may hang on broken IPv6 routes)
+# force IPv4 (routers with broken IPv6 routes may hang)
 curl -4 -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
 
 # jsDelivr CDN mirror
-wget -O - https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh | ash
+curl -fsSL https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh | ash
+
+# or download the archive manually and install the packages from it
+curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/nikki_aarch64_cortex-a53-openwrt-24.10.tar.gz -o nikki.tar.gz
 ```
 
 ## Uninstall & Reset
 
 ```shell
-wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/uninstall.sh | ash
+curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/uninstall.sh | ash
 ```
 
 ## How To Use

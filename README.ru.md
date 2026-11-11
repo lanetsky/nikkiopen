@@ -47,34 +47,40 @@
 ## Установка и обновление
 
 ```shell
+curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+```
+
+Если на роутере нет `curl`, используй `wget`:
+
+```shell
 wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
 ```
 
 Для установки русского перевода (luci-i18n-nikki-ru):
 
 ```shell
-LUCI_I18N=1 wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
+LUCI_I18N=1 curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
 ```
 
 ### Если скачивание зависает (таймаут)
 
-Если команда выше зависает или отваливается по таймауту, используй один из вариантов:
+Если загрузка подвисает или отваливается по таймауту, попробуй один из вариантов:
 
 ```shell
-# curl (на роутерах часто работает стабильнее, чем busybox wget)
-curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
-
-# принудительно IPv4 (busybox wget может зависать на нерабочих IPv6-маршрутах)
+# принудительно IPv4 (на роутерах с битыми IPv6-маршрутами может зависать)
 curl -4 -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh | ash
 
 # зеркало через CDN jsDelivr
-wget -O - https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh | ash
+curl -fsSL https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh | ash
+
+# либо скачай архив вручную и установи пакеты из него
+curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/nikki_aarch64_cortex-a53-openwrt-24.10.tar.gz -o nikki.tar.gz
 ```
 
 ## Удаление и сброс
 
 ```shell
-wget -O - https://github.com/lanetsky/nikkiopen/releases/latest/download/uninstall.sh | ash
+curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/uninstall.sh | ash
 ```
 
 ## Как использовать

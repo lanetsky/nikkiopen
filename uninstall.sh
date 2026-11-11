@@ -25,7 +25,11 @@ if [ -x "/bin/opkg" ]; then
 	if grep -q nikki /etc/opkg/customfeeds.conf; then
 		sed -i '/nikki/d' /etc/opkg/customfeeds.conf
 	fi
-	wget -q -T 30 -t 3 -O "nikki.pub" "https://nikkinikki.pages.dev/key-build.pub"
+	if command -v curl >/dev/null 2>&1; then
+		curl -fsSL --connect-timeout 15 --max-time 60 -o "nikki.pub" "https://nikkinikki.pages.dev/key-build.pub"
+	else
+		wget -q -T 60 -O "nikki.pub" "https://nikkinikki.pages.dev/key-build.pub"
+	fi
 	opkg-key remove nikki.pub
 	rm -f nikki.pub
 elif [ -x "/usr/bin/apk" ]; then

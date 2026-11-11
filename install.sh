@@ -30,27 +30,38 @@ case "$DISTRIB_RELEASE" in
 		;;
 esac
 
-# download helper: wget first, curl as fallback
+# download file: curl first (works better on routers), wget as fallback
+# note: busybox wget / uclient-fetch / GNU wget differ, so only common flags are used (-q -T -O)
 download() {
 	url="$1"
 	out="$2"
-	if command -v wget >/dev/null 2>&1; then
-		wget -q -T 30 -t 3 -O "$out" "$url" && return 0
-	fi
+	max_time="$3"
 	if command -v curl >/dev/null 2>&1; then
-		curl -fsSL --connect-timeout 15 --max-time 900 -o "$out" "$url" && return 0
+		if curl -fsSL --connect-timeout 15 --max-time "$max_time" -o "$out" "$url"; then
+			echo "  fetched with curl"
+			return 0
+		fi
+		rm -f "$out"
+	fi
+	if command -v wget >/dev/null 2>&1; then
+		if wget -q -T "$max_time" -O "$out" "$url"; then
+			echo "  fetched with wget"
+			return 0
+		fi
+		rm -f "$out"
 	fi
 	return 1
 }
 
 # fetch text to stdout
-fetch() {
+fetch_text() {
 	url="$1"
-	if command -v wget >/dev/null 2>&1; then
-		wget -q -T 20 -t 2 -O - "$url" && return 0
-	fi
+	max_time="$2"
 	if command -v curl >/dev/null 2>&1; then
-		curl -fsSL --connect-timeout 15 --max-time 60 "$url" && return 0
+		curl -fsSL --connect-timeout 10 --max-time "$max_time" "$url" && return 0
+	fi
+	if command -v wget >/dev/null 2>&1; then
+		wget -q -T "$max_time" -O - "$url" && return 0
 	fi
 	return 1
 }
@@ -61,7 +72,7 @@ base_latest="https://github.com/lanetsky/nikkiopen/releases/latest/download"
 base_tag="https://github.com/lanetsky/nikkiopen/releases/download/${fallback_tag}"
 
 # get latest release tag (informational only)
-latest_tag=$(fetch "https://api.github.com/repos/lanetsky/nikkiopen/releases/latest" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+latest_tag=$(fetch_text "https://api.github.com/repos/lanetsky/nikkiopen/releases/latest" 45 | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
 [ -z "$latest_tag" ] && latest_tag="$fallback_tag"
 echo "latest release: $latest_tag"
 
@@ -71,15 +82,16 @@ archive_file="nikki_archive.tar.gz"
 got=
 for url in "${base_latest}/${archive}" "${base_tag}/${archive}"; do
 	echo "download $url"
-	if download "$url" "$archive_file"; then
+	if download "$url" "$archive_file" 900; then
 		got=1
 		break
 	fi
-	echo "failed, trying next source"
-	rm -f "$archive_file"
+	echo "  failed, trying next source"
 done
 if [ -z "$got" ]; then
 	echo "failed to download release for $arch/$branch"
+	echo "download it manually and install the packages:"
+	echo "  curl -fsSL https://github.com/lanetsky/nikkiopen/releases/latest/download/${archive} -o ${archive}"
 	exit 1
 fi
 

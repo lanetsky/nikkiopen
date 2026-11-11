@@ -1,0 +1,31 @@
+name: sync-release-scripts
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: sync install/uninstall scripts to latest release
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+
+      - name: upload scripts to latest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          tag=$(gh api "repos/${REPO}/releases/latest" --jq .tag_name 2>/dev/null) || true
+          if [ -z "$tag" ]; then
+            echo "no release published yet, nothing to sync"
+            exit 0
+          fi
+          echo "syncing install.sh/uninstall.sh to ${tag}"
+          gh release upload "$tag" install.sh uninstall.sh --clobber --repo "$REPO"
