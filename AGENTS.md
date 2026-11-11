@@ -7,7 +7,7 @@ Binary-only mihomo package (no Go build), install via one script from router.
 
 ## Current state
 
-- mihomo (core) version: **v1.19.33** (`nikki/Makefile` `PKG_VERSION`), `PKG_RELEASE=1`
+- mihomo (core) version: **v1.19.34** (`nikki/Makefile` `PKG_VERSION`), `PKG_RELEASE=1`
 - nikki base: **upstream v1.26.2**; LuCI App Version: **1.26.2** (`luci-app-nikki/Makefile` `PKG_VERSION`)
 - OpenWrt: 24.10 + 25.12, arch: aarch64_cortex-a53
 - Default config: `nikki/files/nikki.conf`
@@ -68,7 +68,7 @@ Compared to upstream defaults:
 - Extracts `nikki_{arch}-{branch}.tar.gz`, installs ipk/apk
 - `LUCI_I18N=1` env var enables Russian translation install
 - CDN raw.githubusercontent.com caches old versions — known issue, not yet fixed (users get 404/429 on raw URL)
-- Fallback tag: `v1.19.33-1` if API fails
+- Fallback tag: `v1.19.34-1` if API fails
 
 ## Build / Release
 
