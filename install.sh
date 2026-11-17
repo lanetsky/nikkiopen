@@ -67,7 +67,7 @@ fetch_text() {
 }
 
 # release sources: latest release assets first, pinned tag as fallback
-fallback_tag="v1.19.34-1"
+fallback_tag="v1.19.34-2"
 base_latest="https://github.com/lanetsky/nikkiopen/releases/latest/download"
 base_tag="https://github.com/lanetsky/nikkiopen/releases/download/${fallback_tag}"
 
