@@ -961,6 +961,14 @@ msgstr ""
 msgid "Test Profile"
 msgstr ""
 
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:118
+msgid "The archive with the dashboard. The core downloads and unpacks it into the UI directory."
+msgstr ""
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:107
+msgid "The name of the folder inside the UI directory. It must match the selected dashboard."
+msgstr ""
+
 #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:42
 msgid "Total"
 msgstr ""
@@ -987,7 +995,7 @@ msgstr ""
 msgid "UI Path"
 msgstr ""
 
-#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:103
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:109
 msgid "UI Url"
 msgstr ""
 

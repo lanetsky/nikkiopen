@@ -960,6 +960,14 @@ msgstr "Тайм-аут TUN"
 msgid "Test Profile"
 msgstr "Проверить профиль"
 
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:118
+msgid "The archive with the dashboard. The core downloads and unpacks it into the UI directory."
+msgstr "Архив с панелью. Ядро скачивает его и распаковывает в каталог интерфейса."
+
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:107
+msgid "The name of the folder inside the UI directory. It must match the selected dashboard."
+msgstr "Имя папки внутри каталога интерфейса. Должно совпадать с выбранной панелью."
+
 #: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/profile.js:42
 msgid "Total"
 msgstr "Всего"
@@ -986,7 +994,7 @@ msgstr "Имя интерфейса"
 msgid "UI Path"
 msgstr "Путь к интерфейсу"
 
-#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:103
+#: applications/luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js:109
 msgid "UI Url"
 msgstr "URL интерфейса"
 

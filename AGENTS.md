@@ -23,6 +23,7 @@ Base is upstream **v1.26.2**. Custom-modified files — merge manually with upst
 - `install.sh` — own installer (GitHub API `lanetsky/nikkiopen`), keep, do NOT adopt upstream `mihomo-meta` split
 - `luci-app-nikki/htdocs/luci-static/resources/tools/nikki.js` — copy upstream, re-add `callNikkiHwid` rpc + `hwid()` method
 - `luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js` — copy upstream, re-apply 'Taproom Nikki' branding
+- `luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js` — copy upstream, re-apply MIBoard dashboard presets + `ui_name` auto-fill (see below)
 - `luci-app-nikki/htdocs/luci-static/resources/view/nikki/proxy.js` — our version (upstream does not change it; only removed `bypass_china` flags)
 - `luci-app-nikki/root/usr/share/rpcd/ucode/luci.nikki` — copy upstream (url fix `api_tls_listen ?? api_listen`), re-add `hwid` method
 - `luci-app-nikki/po/ru/nikki.po` — copy upstream, remove 'Bypass China Mainland IP' entries, rename msgstr 'Nikki'→'Taproom Nikki', translate new strings
@@ -33,8 +34,8 @@ Files copied from upstream v1.26.2 without changes:
 - `nikki/files/ucode/hijack.ut` (dns_hijack guard fix), `include.uc`, `mixin.uc`
 - `nikki/files/mixin.yaml`
 - `nikki/files/uci-defaults/firewall.sh`, `init.sh`
-- `luci-app-nikki/Makefile` (PKG_VERSION:=1.26.2 — keeps App Version in sync)
-- `luci-app-nikki/htdocs/luci-static/resources/view/nikki/mixin.js`, `editor.js`, `log.js`
+- `luci-app-nikki/Makefile` (PKG_VERSION:=1.26.2 — keeps App Version in sync; own `PKG_RELEASE` — bump it for fork-specific LuCI changes, otherwise opkg skips same-version packages)
+- `luci-app-nikki/htdocs/luci-static/resources/view/nikki/editor.js`, `log.js`
 - `luci-app-nikki/root/usr/share/rpcd/acl.d/luci-app-nikki.json` (`/tmp/log/nikki/*.log` access)
 - `luci-app-nikki/po/templates/nikki.pot`
 
@@ -46,8 +47,18 @@ Ignore/skip from upstream: `mihomo-alpha/`, `mihomo-meta/` Makefiles (upstream m
 - Mode: tproxy/tproxy (upstream redirect/tun)
 - HWID: MAC-based sha256 in subscription headers
 - UI: "Taproom Nikki" branding
+- Dashboard picker in Mixin: extra MIBoard presets (`blagodaren/miboard`) + `ui_name` auto-fill; default panel stays Zashboard
 - Removed: geoip files, bypass China, Chinese translations
 - `+curl` in DEPENDS required: nikki.init uses curl for subscription updates
+
+## Dashboard (Mixin → External Control Config)
+
+- `ui_path` → mihomo `external-ui`; `ui_name` → `external-ui-name`; `ui_url` → `external-ui-url` (archive downloaded by the core: auto on start if the target dir is empty, or `POST /upgrade/ui` = LuCI button "Update Dashboard")
+- `mixin.js` presets for `ui_url` (combobox, free text allowed): Zashboard (CDN Fonts) / Zashboard / MetaCubeXD / YACD / Razord / MIBoard / MIBoard (CDN Fonts)
+- `onchange` on `ui_url` fills `ui_name` with the panel's canonical folder name (`miboard`, `zashboard`, `metacubexd`, `yacd`, `razord`) via `this.section.getUIElement(section_id, 'ui_name').setValue(name)` — LuCI `form.Value` with `.value()` renders a `ui.Combobox` and fires `widget-change` → `onchange`
+- MIBoard serves at `/ui/miboard/` and reads `?hostname=…&port=…&secret=…` (also zashboard-compatible `#/setup?…`), so the LuCI "Open Dashboard" button auto-connects it
+- switching panel: old panel folder stays in `/etc/nikki/run/ui/<old-name>/` (mihomo only cleans the target dir) — remove manually
+- default config (`nikki/files/nikki.conf`): `ui_path 'ui'`, `ui_url` = Zashboard CDN fonts, `ui_name` unset → panel at `/ui/`
 
 ## Default config changes (nikki/files/nikki.conf)
 

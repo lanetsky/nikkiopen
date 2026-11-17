@@ -99,6 +99,12 @@ return view.extend({
 
         o = s.taboption('external_control', form.Value, 'ui_name', _('UI Name'));
         o.placeholder = _('Unmodified');
+        o.value('miboard', 'MIBoard');
+        o.value('zashboard', 'Zashboard');
+        o.value('metacubexd', 'MetaCubeXD');
+        o.value('yacd', 'YACD');
+        o.value('razord', 'Razord');
+        o.tooltip = _('The name of the folder inside the UI directory. It must match the selected dashboard.');
 
         o = s.taboption('external_control', form.Value, 'ui_url', _('UI Url'));
         o.placeholder = _('Unmodified');
@@ -107,6 +113,28 @@ return view.extend({
         o.value('https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip', 'MetaCubeXD');
         o.value('https://github.com/MetaCubeX/Yacd-meta/archive/refs/heads/gh-pages.zip', 'YACD');
         o.value('https://github.com/MetaCubeX/Razord-meta/archive/refs/heads/gh-pages.zip', 'Razord');
+        o.value('https://github.com/blagodaren/miboard/releases/latest/download/dist.zip', 'MIBoard');
+        o.value('https://github.com/blagodaren/miboard/releases/latest/download/dist-cdn-fonts.zip', 'MIBoard (CDN Fonts)');
+        o.tooltip = _('The archive with the dashboard. The core downloads and unpacks it into the UI directory.');
+        o.onchange = function (ev, section_id, value) {
+            var presets = {
+                'https://github.com/blagodaren/miboard/releases/latest/download/dist.zip': 'miboard',
+                'https://github.com/blagodaren/miboard/releases/latest/download/dist-cdn-fonts.zip': 'miboard',
+                'https://github.com/Zephyruso/zashboard/releases/latest/download/dist-cdn-fonts.zip': 'zashboard',
+                'https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip': 'zashboard',
+                'https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip': 'metacubexd',
+                'https://github.com/MetaCubeX/Yacd-meta/archive/refs/heads/gh-pages.zip': 'yacd',
+                'https://github.com/MetaCubeX/Razord-meta/archive/refs/heads/gh-pages.zip': 'razord'
+            };
+            var name = presets[value];
+            if (!name) {
+                return;
+            }
+            var el = this.section.getUIElement(section_id, 'ui_name');
+            if (el && el.setValue) {
+                el.setValue(name);
+            }
+        };
 
         o = s.taboption('external_control', form.Value, 'api_listen', _('API Listen'));
         o.datatype = 'ipaddrport(1)';
