@@ -3,7 +3,7 @@
 # Nikki's installer
 
 # check env
-if [[ ! -x "/bin/opkg" && ! -x "/usr/bin/apk" || ! -x "/sbin/fw4" ]]; then
+if { [ ! -x "/bin/opkg" ] && [ ! -x "/usr/bin/apk" ]; } || [ ! -x "/sbin/fw4" ]; then
 	echo "only supports OpenWrt build with firewall4!"
 	exit 1
 fi
@@ -67,7 +67,7 @@ fetch_text() {
 }
 
 # release sources: latest release assets first, pinned tag as fallback
-fallback_tag="v1.19.34-2"
+fallback_tag="v1.19.34-3"
 base_latest="https://github.com/lanetsky/nikkiopen/releases/latest/download"
 base_tag="https://github.com/lanetsky/nikkiopen/releases/download/${fallback_tag}"
 
@@ -76,9 +76,19 @@ latest_tag=$(fetch_text "https://api.github.com/repos/lanetsky/nikkiopen/release
 [ -z "$latest_tag" ] && latest_tag="$fallback_tag"
 echo "latest release: $latest_tag"
 
+# workdir (tmpfs on openwrt, removed on exit)
+workdir=$(mktemp -d 2>/dev/null)
+[ -n "$workdir" ] || workdir="/tmp/nikki-install.$$"
+mkdir -p "$workdir" || exit 1
+cleanup() {
+	cd / 2>/dev/null
+	rm -rf "$workdir"
+}
+trap cleanup EXIT INT TERM
+
 # download release archive
 archive="nikki_${arch}-${branch}.tar.gz"
-archive_file="nikki_archive.tar.gz"
+archive_file="$workdir/nikki_archive.tar.gz"
 got=
 for url in "${base_latest}/${archive}" "${base_tag}/${archive}"; do
 	echo "download $url"
@@ -97,32 +107,55 @@ fi
 
 # extract
 echo "extract $archive"
+cd "$workdir" || exit 1
 tar -xzf "$archive_file" || {
 	echo "failed to extract archive"
-	rm -f "$archive_file"
 	exit 1
 }
 rm -f "$archive_file"
 
+# stop the running service before the packages are replaced
+# (the old instance would keep the old binary and the old rules)
+if [ -x "/etc/init.d/nikki" ]; then
+	echo "stop nikki service"
+	/etc/init.d/nikki stop > /dev/null 2>&1
+fi
+
 # install packages
 if [ -x "/bin/opkg" ]; then
 	echo "install ipks"
-	opkg install nikki*.ipk luci-app-nikki*.ipk
+	if ! opkg install nikki*.ipk luci-app-nikki*.ipk; then
+		echo "failed to install the packages"
+		exit 1
+	fi
 	rm -f nikki*.ipk luci-app-nikki*.ipk
 	if [ -n "$LUCI_I18N" ]; then
 		echo "install luci-i18n-nikki-ru"
-		opkg install luci-i18n-nikki-ru*.ipk
+		opkg install luci-i18n-nikki-ru*.ipk || echo "  failed to install luci-i18n-nikki-ru"
 	fi
 	rm -f *.ipk *.json
 elif [ -x "/usr/bin/apk" ]; then
 	echo "install apks"
-	apk add --allow-untrusted nikki*.apk luci-app-nikki*.apk
+	if ! apk add --allow-untrusted nikki*.apk luci-app-nikki*.apk; then
+		echo "failed to install the packages"
+		echo "check the output above, the most common reasons are:"
+		echo "  - a dependency that the package manager cannot find (e.g. yq),"
+		echo "    the repositories must be reachable and up to date (apk update)"
+		echo "  - the packages are not signed, --allow-untrusted is used automatically"
+		exit 1
+	fi
 	rm -f nikki*.apk luci-app-nikki*.apk
 	if [ -n "$LUCI_I18N" ]; then
 		echo "install luci-i18n-nikki-ru"
-		apk add --allow-untrusted luci-i18n-nikki-ru*.apk
+		apk add --allow-untrusted luci-i18n-nikki-ru*.apk || echo "  failed to install luci-i18n-nikki-ru"
 	fi
 	rm -f *.apk *.adb
+fi
+
+# verify the installation
+if [ ! -x "/etc/init.d/nikki" ]; then
+	echo "the nikki service is not installed"
+	exit 1
 fi
 
 echo "success"

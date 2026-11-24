@@ -9,6 +9,7 @@ PROG="/usr/bin/mihomo"
 . "$IPKG_INSTROOT/etc/nikki/scripts/include.sh"
 
 extra_command 'update_subscription' 'Update subscription by section id'
+extra_command 'cleanup_leftovers' 'Remove the leftovers of a previous run'
 extra_command 'clear_logs' 'Clear logs if size exceeds the limit'
 
 boot_func() {
@@ -132,10 +133,15 @@ start_service() {
 		fi
 		cp -f "$profile_file" "$RUN_PROFILE_PATH"
 	elif [ "$profile_type" = "subscription" ]; then
-		local subscription_section; subscription_section="$profile_id"
+		local subscription_section; subscription_section="$(resolve_subscription_section "$profile_id")"
+		if [ -z "$subscription_section" ]; then
+			log "Profile" "Subscription section not found."
+			log "App" "Exit."
+			return
+		fi
 		local subscription_name subscription_prefer
-		config_get subscription_name "$subscription_section" "name"
-		config_get subscription_prefer "$subscription_section" "prefer" "remote"
+		subscription_name=$(nikki_uci_get "$subscription_section" "name")
+		subscription_prefer=$(nikki_uci_get "$subscription_section" "prefer" "remote")
 		log "Profile" "Use subscription: $subscription_name."
 		local subscription_file; subscription_file="$SUBSCRIPTIONS_DIR/$subscription_section.yaml"
 		if [ "$subscription_prefer" = "remote" ] || [ ! -f "$subscription_file" ]; then
@@ -155,45 +161,54 @@ start_service() {
 	# mixin
 	if [ "$core_only" = 0 ]; then
 		log "Mixin" "Mixin config."
-		if [ "$overwrite_authentication" = 1 ]; then
-			yq -M -i 'del(.authentication)' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$overwrite_tun_dns_hijack" = 1 ]; then
-			yq -M -i 'del(.tun.dns-hijack)' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$overwrite_fake_ip_filter" = 1 ]; then
-			yq -M -i 'del(.dns.fake-ip-filter)' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$overwrite_hosts" = 1 ]; then
-			yq -M -i 'del(.hosts)' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$overwrite_dns_nameserver" = 1 ]; then
-			yq -M -i 'del(.dns.default-nameserver) | del(.dns.proxy-server-nameserver) | del(.dns.direct-nameserver) | del(.dns.nameserver) | del(.dns.fallback) ' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$overwrite_dns_nameserver_policy" = 1 ]; then
-			yq -M -i 'del(.dns.nameserver-policy)' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$overwrite_sniffer_force_domain_name" = 1 ]; then
-			yq -M -i 'del(.sniffer.force-domain)' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$overwrite_sniffer_ignore_domain_name" = 1 ]; then
-			yq -M -i 'del(.sniffer.skip-domain)' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$overwrite_sniffer_sniff" = 1 ]; then
-			yq -M -i 'del(.sniffer.sniff)' "$RUN_PROFILE_PATH"
-		fi
-		if [ "$mixin_file_content" = 0 ]; then
-			ucode -S "$MIXIN_UC" | yq -M -p json -o yaml | yq -M -i eval-all '... comments="" | . as $item ireduce ({}; . * $item ) | .proxies = .nikki-proxies + .proxies | del(.nikki-proxies) | .proxy-groups = .nikki-proxy-groups + .proxy-groups | del(.nikki-proxy-groups) | .rules = .nikki-rules + .rules | del(.nikki-rules) | explode(.)' "$RUN_PROFILE_PATH" -
-		elif [ "$mixin_file_content" = 1 ]; then
-			ucode -S "$MIXIN_UC" | yq -M -p json -o yaml | yq -M -i eval-all '... comments="" | . as $item ireduce ({}; . * $item ) | .proxies = .nikki-proxies + .proxies | del(.nikki-proxies) | .proxy-groups = .nikki-proxy-groups + .proxy-groups | del(.nikki-proxy-groups) | .rules = .nikki-rules + .rules | del(.nikki-rules) | explode(.)' "$RUN_PROFILE_PATH" "$MIXIN_FILE_PATH" -
-		fi
-		if [ "$proxy_enabled" = 1 ]; then
-			if yq -M -e 'has("tun")' "$RUN_PROFILE_PATH" > /dev/null 2>&1; then
-				yq -M -i '(.tun) |= (.auto-route = false | .auto-redirect = false | .auto-detect-interface = false | .disable-icmp-forwarding = true)' "$RUN_PROFILE_PATH"
+		rm -f "$TEMP_DIR/mixin.err"
+		{
+			if [ "$overwrite_authentication" = 1 ]; then
+				yq -M -i 'del(.authentication)' "$RUN_PROFILE_PATH"
 			fi
-			if yq -M -e 'has("listeners")' "$RUN_PROFILE_PATH" > /dev/null 2>&1; then
-				yq -M -i '(.listeners[] | select(.type == "tun")) |= (.auto-route = false | .auto-redirect = false | .auto-detect-interface = false | .disable-icmp-forwarding = true)' "$RUN_PROFILE_PATH"
+			if [ "$overwrite_tun_dns_hijack" = 1 ]; then
+				yq -M -i 'del(.tun.dns-hijack)' "$RUN_PROFILE_PATH"
 			fi
+			if [ "$overwrite_fake_ip_filter" = 1 ]; then
+				yq -M -i 'del(.dns.fake-ip-filter)' "$RUN_PROFILE_PATH"
+			fi
+			if [ "$overwrite_hosts" = 1 ]; then
+				yq -M -i 'del(.hosts)' "$RUN_PROFILE_PATH"
+			fi
+			if [ "$overwrite_dns_nameserver" = 1 ]; then
+				yq -M -i 'del(.dns.default-nameserver) | del(.dns.proxy-server-nameserver) | del(.dns.direct-nameserver) | del(.dns.nameserver) | del(.dns.fallback) ' "$RUN_PROFILE_PATH"
+			fi
+			if [ "$overwrite_dns_nameserver_policy" = 1 ]; then
+				yq -M -i 'del(.dns.nameserver-policy)' "$RUN_PROFILE_PATH"
+			fi
+			if [ "$overwrite_sniffer_force_domain_name" = 1 ]; then
+				yq -M -i 'del(.sniffer.force-domain)' "$RUN_PROFILE_PATH"
+			fi
+			if [ "$overwrite_sniffer_ignore_domain_name" = 1 ]; then
+				yq -M -i 'del(.sniffer.skip-domain)' "$RUN_PROFILE_PATH"
+			fi
+			if [ "$overwrite_sniffer_sniff" = 1 ]; then
+				yq -M -i 'del(.sniffer.sniff)' "$RUN_PROFILE_PATH"
+			fi
+			if [ "$mixin_file_content" = 0 ]; then
+				mixin_apply "$RUN_PROFILE_PATH"
+			elif [ "$mixin_file_content" = 1 ]; then
+				mixin_apply "$RUN_PROFILE_PATH" "$MIXIN_FILE_PATH"
+			fi
+			if [ "$proxy_enabled" = 1 ]; then
+				if yq -M -e 'has("tun")' "$RUN_PROFILE_PATH" > /dev/null 2>&1; then
+					yq -M -i '(.tun) |= (.auto-route = false | .auto-redirect = false | .auto-detect-interface = false | .disable-icmp-forwarding = true)' "$RUN_PROFILE_PATH"
+				fi
+				if yq -M -e 'has("listeners")' "$RUN_PROFILE_PATH" > /dev/null 2>&1; then
+					yq -M -i '(.listeners[] | select(.type == "tun")) |= (.auto-route = false | .auto-redirect = false | .auto-detect-interface = false | .disable-icmp-forwarding = true)' "$RUN_PROFILE_PATH"
+				fi
+			fi
+		} 2> "$TEMP_DIR/mixin.err"
+		if [ -s "$TEMP_DIR/mixin.err" ]; then
+			log "Mixin" "Errors occurred while applying the mixin config."
+			log "Mixin" "$(head -n 5 "$TEMP_DIR/mixin.err" 2>/dev/null | tr '\n' ' ')"
+		else
+			log "Mixin" "Mixin config applied."
 		fi
 	fi
 	# check profile
@@ -414,22 +429,26 @@ service_started() {
 		# ip route and rule
 		if [ "$tproxy_enable" = 1 ]; then
 			if [ "$ipv4_proxy" = 1 ]; then
-				ip -4 route add local default dev lo table "$tproxy_route_table"
-				ip -4 rule add pref "$tproxy_rule_pref" fwmark "$tproxy_fw_mark/$tproxy_fw_mask" table "$tproxy_route_table"
+				ip -4 route add local default dev lo table "$tproxy_route_table" 2>/dev/null
+				ip -4 rule add pref "$tproxy_rule_pref" fwmark "$tproxy_fw_mark/$tproxy_fw_mask" table "$tproxy_route_table" 2>/dev/null
+				ip -4 rule show 2>/dev/null | grep -q "table $tproxy_route_table" || log "Proxy" "Failed to add the IPv4 tproxy rule."
 			fi
 			if [ "$ipv6_proxy" = 1 ]; then
-				ip -6 route add local default dev lo table "$tproxy_route_table"
-				ip -6 rule add pref "$tproxy_rule_pref" fwmark "$tproxy_fw_mark/$tproxy_fw_mask" table "$tproxy_route_table"
+				ip -6 route add local default dev lo table "$tproxy_route_table" 2>/dev/null
+				ip -6 rule add pref "$tproxy_rule_pref" fwmark "$tproxy_fw_mark/$tproxy_fw_mask" table "$tproxy_route_table" 2>/dev/null
+				ip -6 rule show 2>/dev/null | grep -q "table $tproxy_route_table" || log "Proxy" "Failed to add the IPv6 tproxy rule."
 			fi
 		fi
 		if [ "$tun_enable" = 1 ]; then
 			if [ "$ipv4_proxy" = 1 ]; then
-				ip -4 route add unicast default dev "$tun_device" table "$tun_route_table"
-				ip -4 rule add pref "$tun_rule_pref" fwmark "$tun_fw_mark/$tun_fw_mask" table "$tun_route_table"
+				ip -4 route add unicast default dev "$tun_device" table "$tun_route_table" 2>/dev/null
+				ip -4 rule add pref "$tun_rule_pref" fwmark "$tun_fw_mark/$tun_fw_mask" table "$tun_route_table" 2>/dev/null
+				ip -4 rule show 2>/dev/null | grep -q "table $tun_route_table" || log "Proxy" "Failed to add the IPv4 tun rule."
 			fi
 			if [ "$ipv6_proxy" = 1 ]; then
-				ip -6 route add unicast default dev "$tun_device" table "$tun_route_table"
-				ip -6 rule add pref "$tun_rule_pref" fwmark "$tun_fw_mark/$tun_fw_mask" table "$tun_route_table"
+				ip -6 route add unicast default dev "$tun_device" table "$tun_route_table" 2>/dev/null
+				ip -6 rule add pref "$tun_rule_pref" fwmark "$tun_fw_mark/$tun_fw_mask" table "$tun_route_table" 2>/dev/null
+				ip -6 rule show 2>/dev/null | grep -q "table $tun_route_table" || log "Proxy" "Failed to add the IPv6 tun rule."
 			fi
 			$FIREWALL_INCLUDE_SH
 		fi
@@ -439,12 +458,15 @@ service_started() {
 			ip -6 route add "$fake_ip6_range" dev "$dummy_device"
 		fi
 		# hijack
-		utpl -S "$HIJACK_UT" | nft -f -
+		local hijack_err="$TEMP_DIR/hijack.err"
+		rm -f "$hijack_err"
+		utpl -S "$HIJACK_UT" 2>"$hijack_err" | nft -f - 2>>"$hijack_err"
 		# check hijack
-		if nft list tables | grep -q nikki; then
+		if nft list tables 2>/dev/null | grep -q nikki; then
 			log "Proxy" "Hijack successful."
 		else
 			log "Proxy" "Hijack failed."
+			log "Proxy" "$(head -n 5 "$hijack_err" 2>/dev/null | tr '\n' ' ')"
 			log "App" "Exit."
 		fi
 	fi
@@ -563,12 +585,20 @@ update_subscription() {
 	fi
 	# load config
 	config_load nikki
+	# resolve the section (the official luci app uses anonymous sections)
+	if [ -z "$(nikki_uci_get "$subscription_section" "url")" ]; then
+		subscription_section="$(resolve_subscription_section "$subscription_section")"
+		if [ -z "$subscription_section" ]; then
+			log "Profile" "Subscription section not found."
+			return
+		fi
+	fi
 	# get subscription config
 	local subscription_name subscription_info_url subscription_url subscription_user_agent
-	config_get subscription_name "$subscription_section" "name"
-	config_get subscription_info_url "$subscription_section" "info_url"
-	config_get subscription_url "$subscription_section" "url"
-	config_get subscription_user_agent "$subscription_section" "user_agent"
+	subscription_name=$(nikki_uci_get "$subscription_section" "name")
+	subscription_info_url=$(nikki_uci_get "$subscription_section" "info_url")
+	subscription_url=$(nikki_uci_get "$subscription_section" "url")
+	subscription_user_agent=$(nikki_uci_get "$subscription_section" "user_agent")
 	# get hwid config
 	local hwid device_os ver_os device_model
 	hwid="$(get_hwid)"

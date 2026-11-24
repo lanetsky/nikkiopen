@@ -7,7 +7,7 @@ Binary-only mihomo package (no Go build), install via one script from router.
 
 ## Current state
 
-- mihomo (core) version: **v1.19.34** (`nikki/Makefile` `PKG_VERSION`), `PKG_RELEASE=1`
+- mihomo (core) version: **v1.19.34** (`nikki/Makefile` `PKG_VERSION`), `PKG_RELEASE=2`
 - nikki base: **upstream v1.26.2**; LuCI App Version: **1.26.2** (`luci-app-nikki/Makefile` `PKG_VERSION`)
 - OpenWrt: 24.10 + 25.12, arch: aarch64_cortex-a53
 - Default config: `nikki/files/nikki.conf`
@@ -17,9 +17,11 @@ Binary-only mihomo package (no Go build), install via one script from router.
 Base is upstream **v1.26.2**. Custom-modified files — merge manually with upstream:
 - `nikki/Makefile` — rewritten to binary-only (no Go/GoBinPackage/ALTERNATIVES), `Build/Prepare` downloads slim mihomo binary from `SaltyMonkey/justclash-core-slim` GitHub releases (`mihomo-linux-arm64-v$(PKG_VERSION).gz`, same tag/asset naming as MetaCubeX)
 - `nikki/files/nikki.conf` — default config with custom defaults (see below), incl. `log.clear_at_stop '1'`
-- `nikki/files/nikki.init` — curl subscription update with HWID headers (`x-hwid`, `x-device-os`, `x-ver-os`, `x-device-model` in `update_subscription`), TZ env var passed to mihomo (after `SKIP_SYSTEM_IPV6_CHECK`) for correct core log timestamps
-- `nikki/files/scripts/include.sh` — paths and `get_hwid`/`get_openwrt_version`/`get_device_model` helper functions (no geoip)
-- `nikki/files/uci-defaults/migrate.sh` — upstream v1.26.2 minus the `bypass_china_mainland_ip` migration block (v1.24.3 section)
+- `nikki/files/nikki.init` — curl subscription update with HWID headers (`x-hwid`, `x-device-os`, `x-ver-os`, `x-device-model` in `update_subscription`), TZ env var passed to mihomo (after `SKIP_SYSTEM_IPV6_CHECK`) for correct core log timestamps, subscription section resolution via `uci_get` (works with anonymous sections), mixin/profile/hijack errors are logged instead of silently ignored
+- `nikki/files/scripts/include.sh` — paths and `get_hwid`/`get_openwrt_version`/`get_device_model` helper functions (no geoip), plus `nikki_uci_get`, `resolve_subscription_section`, `cleanup_leftovers`, `mixin_apply`, `MIXIN_EXPR`
+- `nikki/files/scripts/migrate.sh` — the whole config migration (upstream v1.26.2 blocks + fork specific blocks), called by `99_migrate_nikki` and by the package postinst
+- `nikki/files/uci-defaults/migrate.sh` — thin wrapper that runs `/etc/nikki/scripts/migrate.sh` (do NOT duplicate the logic there)
+- `nikki/files/ucode/hijack.ut` — upstream file **with the geoip nft includes removed** (we do not ship `nikki/files/nftables/`); keep it removed, otherwise a config with `bypass_china_mainland_ip=1` breaks the whole hijack table
 - `install.sh` — own installer (GitHub API `lanetsky/nikkiopen`), keep, do NOT adopt upstream `mihomo-meta` split
 - `luci-app-nikki/htdocs/luci-static/resources/tools/nikki.js` — copy upstream, re-add `callNikkiHwid` rpc + `hwid()` method
 - `luci-app-nikki/htdocs/luci-static/resources/view/nikki/app.js` — copy upstream, re-apply 'Taproom Nikki' branding
@@ -31,7 +33,7 @@ Base is upstream **v1.26.2**. Custom-modified files — merge manually with upst
 Files copied from upstream v1.26.2 without changes:
 - `nikki/files/nikki.upgrade`
 - `nikki/files/scripts/debug.sh`, `firewall_include.sh`
-- `nikki/files/ucode/hijack.ut` (dns_hijack guard fix), `include.uc`, `mixin.uc`
+- `nikki/files/ucode/include.uc`, `mixin.uc`
 - `nikki/files/mixin.yaml`
 - `nikki/files/uci-defaults/firewall.sh`, `init.sh`
 - `luci-app-nikki/Makefile` (PKG_VERSION:=1.26.2 — keeps App Version in sync; own `PKG_RELEASE` — bump it for fork-specific LuCI changes, otherwise opkg skips same-version packages)
@@ -50,6 +52,10 @@ Ignore/skip from upstream: `mihomo-alpha/`, `mihomo-meta/` Makefiles (upstream m
 - Dashboard picker in Mixin: extra MIBoard presets (`blagodaren/miboard`) + `ui_name` auto-fill; default panel stays Zashboard
 - Removed: geoip files, bypass China, Chinese translations
 - `+curl` in DEPENDS required: nikki.init uses curl for subscription updates
+- `+ucode +ucode-mod-uci +ucode-mod-ubus +nftables` in DEPENDS: the mixin (`ucode -S mixin.uc`) and the hijack (`utpl -S hijack.ut`) need them
+- Package lifecycle scripts (`nikki/Makefile`): `preinst` stops the running service + cleans leftovers before the package is replaced, `postinst` runs the migration and restarts the service, `prerm` stops the service and cleans leftovers, `postrm` removes the firewall include and the nft/ip leftovers
+- Config compatibility with the official nikki 2026.x (see `nikki/files/scripts/migrate.sh`): anonymous subscription sections are renamed to a named one, `bypass_china_mainland_ip*` is forced to 0, missing proxy options are restored
+- Nothing fails silently anymore: the mixin, the profile checks, the ip rules and the nft hijack log their errors to `/var/log/nikki/app.log`
 
 ## Dashboard (Mixin → External Control Config)
 
@@ -79,12 +85,15 @@ Compared to upstream defaults:
 - Extracts `nikki_{arch}-{branch}.tar.gz`, installs ipk/apk
 - `LUCI_I18N=1` env var enables Russian translation install
 - Installer must NOT depend on `raw.githubusercontent.com` (timeout/blocked for many users) — `install.sh`/`uninstall.sh` are attached to release assets, install cmd: `https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh`
-- `install.sh` resolves the archive via `/releases/latest/download/` (no hard dependency on `api.github.com`), falls back to pinned tag `v1.19.34-1`
+- `install.sh` resolves the archive via `/releases/latest/download/` (no hard dependency on `api.github.com`), falls back to pinned tag `v1.19.34-3`
 - **Router `wget` is uclient-fetch, not busybox wget** — it does NOT support `-t` (tries) and its `-T` is a connect/request timeout. Use only flags common to busybox/uclient-fetch/GNU wget: `-q -T N -O file`. Never `-t`.
 - Tool order in scripts: **curl first** (works on routers where uclient-fetch cannot connect to github.com), wget as fallback
+- Works in its own temp dir (`mktemp -d`, removed by a trap), it does not pollute the current directory anymore
+- **Stops the running nikki service before the packages are replaced** (the old instance would keep the old binary and the old nft/ip rules)
+- **Checks the exit code of `opkg install` / `apk add`** and exits with an error instead of printing "success"; on apk failure it prints the usual reasons (missing dependency like `yq`, unreachable repositories)
 - CDN jsDelivr mirror documented in README as fallback: `https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh`
 - `.github/workflows/sync-release-scripts.yml` — on push to main re-uploads `install.sh`/`uninstall.sh` to the latest release assets (keeps `/releases/latest/download/install.sh` fresh); release assets are cached by GitHub CDN for ~5 min after re-upload
-- Fallback tag: `v1.19.34-1` if API fails
+- Fallback tag: `v1.19.34-3` if API fails
 
 ## Build / Release
 
@@ -103,3 +112,7 @@ Compared to upstream defaults:
 ## Uninstall
 
 `uninstall.sh` removes any nikki package by name (own or official), cleans configs and logs. Feed removal is harmless legacy.
+
+- Stops the service and removes the leftovers (nft table `inet nikki`, ip rules/routes 80/81, dummy device) before and after the removal
+- `apk del` fails when the world contains an entry of a package that is not available anymore (e.g. the repository index became unreachable): the stale world entry is parsed from the apk error output (`X (no such package)`), removed from `/etc/apk/world` and the removal is retried
+- The `luci-i18n-nikki-ru` package is looked up with `apk list --installed | grep` (not `apk list --manifest`, whose output format differs between apk versions)
