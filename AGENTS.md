@@ -7,7 +7,7 @@ Binary-only mihomo package (no Go build), install via one script from router.
 
 ## Current state
 
-- mihomo (core) version: **v1.19.34** (`nikki/Makefile` `PKG_VERSION`), `PKG_RELEASE=2`
+- mihomo (core) version: **v1.19.34** (`nikki/Makefile` `PKG_VERSION`), `PKG_RELEASE=3`
 - nikki base: **upstream v1.26.2**; LuCI App Version: **1.26.2** (`luci-app-nikki/Makefile` `PKG_VERSION`)
 - OpenWrt: 24.10 + 25.12, arch: aarch64_cortex-a53
 - Default config: `nikki/files/nikki.conf`
@@ -85,7 +85,7 @@ Compared to upstream defaults:
 - Extracts `nikki_{arch}-{branch}.tar.gz`, installs ipk/apk
 - `LUCI_I18N=1` env var enables Russian translation install
 - Installer must NOT depend on `raw.githubusercontent.com` (timeout/blocked for many users) — `install.sh`/`uninstall.sh` are attached to release assets, install cmd: `https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh`
-- `install.sh` resolves the archive via `/releases/latest/download/` (no hard dependency on `api.github.com`), falls back to pinned tag `v1.19.34-3`
+- `install.sh` resolves the archive via `/releases/latest/download/` (no hard dependency on `api.github.com`), falls back to pinned tag `v1.19.34-4`
 - **Router `wget` is uclient-fetch, not busybox wget** — it does NOT support `-t` (tries) and its `-T` is a connect/request timeout. Use only flags common to busybox/uclient-fetch/GNU wget: `-q -T N -O file`. Never `-t`.
 - Tool order in scripts: **curl first** (works on routers where uclient-fetch cannot connect to github.com), wget as fallback
 - Works in its own temp dir (`mktemp -d`, removed by a trap), it does not pollute the current directory anymore
@@ -93,7 +93,7 @@ Compared to upstream defaults:
 - **Checks the exit code of `opkg install` / `apk add`** and exits with an error instead of printing "success"; on apk failure it prints the usual reasons (missing dependency like `yq`, unreachable repositories)
 - CDN jsDelivr mirror documented in README as fallback: `https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh`
 - `.github/workflows/sync-release-scripts.yml` — on push to main re-uploads `install.sh`/`uninstall.sh` to the latest release assets (keeps `/releases/latest/download/install.sh` fresh); release assets are cached by GitHub CDN for ~5 min after re-upload
-- Fallback tag: `v1.19.34-3` if API fails
+- Fallback tag: `v1.19.34-4` if API fails
 
 ## Build / Release
 

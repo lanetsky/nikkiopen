@@ -431,24 +431,28 @@ service_started() {
 			if [ "$ipv4_proxy" = 1 ]; then
 				ip -4 route add local default dev lo table "$tproxy_route_table" 2>/dev/null
 				ip -4 rule add pref "$tproxy_rule_pref" fwmark "$tproxy_fw_mark/$tproxy_fw_mask" table "$tproxy_route_table" 2>/dev/null
-				ip -4 rule show 2>/dev/null | grep -q "table $tproxy_route_table" || log "Proxy" "Failed to add the IPv4 tproxy rule."
+				ip -4 rule show 2>/dev/null | grep -q "lookup $tproxy_route_table" || log "Proxy" "Failed to add the IPv4 tproxy rule."
+				ip -4 route show table "$tproxy_route_table" 2>/dev/null | grep -q "default" || log "Proxy" "Failed to add the IPv4 tproxy route."
 			fi
 			if [ "$ipv6_proxy" = 1 ]; then
 				ip -6 route add local default dev lo table "$tproxy_route_table" 2>/dev/null
 				ip -6 rule add pref "$tproxy_rule_pref" fwmark "$tproxy_fw_mark/$tproxy_fw_mask" table "$tproxy_route_table" 2>/dev/null
-				ip -6 rule show 2>/dev/null | grep -q "table $tproxy_route_table" || log "Proxy" "Failed to add the IPv6 tproxy rule."
+				ip -6 rule show 2>/dev/null | grep -q "lookup $tproxy_route_table" || log "Proxy" "Failed to add the IPv6 tproxy rule."
+				ip -6 route show table "$tproxy_route_table" 2>/dev/null | grep -q "default" || log "Proxy" "Failed to add the IPv6 tproxy route."
 			fi
 		fi
 		if [ "$tun_enable" = 1 ]; then
 			if [ "$ipv4_proxy" = 1 ]; then
 				ip -4 route add unicast default dev "$tun_device" table "$tun_route_table" 2>/dev/null
 				ip -4 rule add pref "$tun_rule_pref" fwmark "$tun_fw_mark/$tun_fw_mask" table "$tun_route_table" 2>/dev/null
-				ip -4 rule show 2>/dev/null | grep -q "table $tun_route_table" || log "Proxy" "Failed to add the IPv4 tun rule."
+				ip -4 rule show 2>/dev/null | grep -q "lookup $tun_route_table" || log "Proxy" "Failed to add the IPv4 tun rule."
+				ip -4 route show table "$tun_route_table" 2>/dev/null | grep -q "default" || log "Proxy" "Failed to add the IPv4 tun route."
 			fi
 			if [ "$ipv6_proxy" = 1 ]; then
 				ip -6 route add unicast default dev "$tun_device" table "$tun_route_table" 2>/dev/null
 				ip -6 rule add pref "$tun_rule_pref" fwmark "$tun_fw_mark/$tun_fw_mask" table "$tun_route_table" 2>/dev/null
-				ip -6 rule show 2>/dev/null | grep -q "table $tun_route_table" || log "Proxy" "Failed to add the IPv6 tun rule."
+				ip -6 rule show 2>/dev/null | grep -q "lookup $tun_route_table" || log "Proxy" "Failed to add the IPv6 tun rule."
+				ip -6 route show table "$tun_route_table" 2>/dev/null | grep -q "default" || log "Proxy" "Failed to add the IPv6 tun route."
 			fi
 			$FIREWALL_INCLUDE_SH
 		fi
