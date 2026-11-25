@@ -265,6 +265,26 @@ esac
 [ -z "$(uci -q get nikki.proxy.lan_proxy)" ] && uci set nikki.proxy.lan_proxy=1
 [ -z "$(uci -q get nikki.proxy.lan_inbound_interface)" ] && uci add_list nikki.proxy.lan_inbound_interface=lan
 
+# 4. the dashboard name
+#    the luci app fills it in only when the url field is changed,
+#    so a fresh install must set it explicitly (otherwise the panel is
+#    extracted into external-ui instead of external-ui/external-ui-name)
+mixin_ui_name=$(uci -q get nikki.mixin.ui_name)
+if [ -z "$mixin_ui_name" ]; then
+	mixin_ui_url=$(uci -q get nikki.mixin.ui_url)
+	case "$mixin_ui_url" in
+		*Zephyruso/zashboard*) uci set nikki.mixin.ui_name='zashboard' ;;
+		*MetaCubeX/metacubexd*) uci set nikki.mixin.ui_name='metacubexd' ;;
+		*MetaCubeX/Yacd-meta*) uci set nikki.mixin.ui_name='yacd' ;;
+		*MetaCubeX/Razord-meta*) uci set nikki.mixin.ui_name='razord' ;;
+		*blagodaren/miboard*) uci set nikki.mixin.ui_name='miboard' ;;
+	esac
+fi
+
+# 5. the tun stack: the kernel stack only (no gvisor)
+mixin_tun_stack=$(uci -q get nikki.mixin.tun_stack)
+[ "$mixin_tun_stack" != "system" ] && uci set nikki.mixin.tun_stack='system'
+
 # commit
 uci commit nikki
 

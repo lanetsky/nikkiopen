@@ -7,7 +7,7 @@ Binary-only mihomo package (no Go build), install via one script from router.
 
 ## Current state
 
-- mihomo (core) version: **v1.19.34** (`nikki/Makefile` `PKG_VERSION`), `PKG_RELEASE=3`
+- mihomo (core) version: **v1.19.34** (`nikki/Makefile` `PKG_VERSION`), `PKG_RELEASE=4`
 - nikki base: **upstream v1.26.2**; LuCI App Version: **1.26.2** (`luci-app-nikki/Makefile` `PKG_VERSION`)
 - OpenWrt: 24.10 + 25.12, arch: aarch64_cortex-a53
 - Default config: `nikki/files/nikki.conf`
@@ -64,12 +64,13 @@ Ignore/skip from upstream: `mihomo-alpha/`, `mihomo-meta/` Makefiles (upstream m
 - `onchange` on `ui_url` fills `ui_name` with the panel's canonical folder name (`miboard`, `zashboard`, `metacubexd`, `yacd`, `razord`) via `this.section.getUIElement(section_id, 'ui_name').setValue(name)` — LuCI `form.Value` with `.value()` renders a `ui.Combobox` and fires `widget-change` → `onchange`
 - MIBoard serves at `/ui/miboard/` and reads `?hostname=…&port=…&secret=…` (also zashboard-compatible `#/setup?…`), so the LuCI "Open Dashboard" button auto-connects it
 - switching panel: old panel folder stays in `/etc/nikki/run/ui/<old-name>/` (mihomo only cleans the target dir) — remove manually
-- default config (`nikki/files/nikki.conf`): `ui_path 'ui'`, `ui_url` = Zashboard CDN fonts, `ui_name` unset → panel at `/ui/`
+- default config (`nikki/files/nikki.conf`): `ui_path 'ui'`, `ui_url` = Zashboard CDN fonts, `ui_name 'zashboard'` → panel at `/ui/zashboard/`. **`ui_name` must stay set in the default config**: the luci app fills it only when the `ui_url` field is changed, so without it a fresh install would extract the panel into `external-ui` instead of `external-ui/external-ui-name`
 
 ## Default config changes (nikki/files/nikki.conf)
 
 Compared to upstream defaults:
 - `config config`: `enabled=1`, `test_profile=0`, `scheduled_restart=1`, `scheduled_restart_cron='0 4 * * 1'` (Mon 04:00)
+- `config mixin`: `ui_name='zashboard'` (upstream unset), `tun_stack='system'` (upstream 'mixed' — the kernel stack only, no gvisor)
 - `config procd`: `fast_reload=1`
 - `config subscription`: `user_agent='mihomo'` (upstream 'clash')
 - `config proxy`: `ipv6_dns_hijack=0`, `ipv6_proxy=0`
@@ -85,7 +86,7 @@ Compared to upstream defaults:
 - Extracts `nikki_{arch}-{branch}.tar.gz`, installs ipk/apk
 - `LUCI_I18N=1` env var enables Russian translation install
 - Installer must NOT depend on `raw.githubusercontent.com` (timeout/blocked for many users) — `install.sh`/`uninstall.sh` are attached to release assets, install cmd: `https://github.com/lanetsky/nikkiopen/releases/latest/download/install.sh`
-- `install.sh` resolves the archive via `/releases/latest/download/` (no hard dependency on `api.github.com`), falls back to pinned tag `v1.19.34-4`
+- `install.sh` resolves the archive via `/releases/latest/download/` (no hard dependency on `api.github.com`), falls back to pinned tag `v1.19.34-5`
 - **Router `wget` is uclient-fetch, not busybox wget** — it does NOT support `-t` (tries) and its `-T` is a connect/request timeout. Use only flags common to busybox/uclient-fetch/GNU wget: `-q -T N -O file`. Never `-t`.
 - Tool order in scripts: **curl first** (works on routers where uclient-fetch cannot connect to github.com), wget as fallback
 - Works in its own temp dir (`mktemp -d`, removed by a trap), it does not pollute the current directory anymore
@@ -93,13 +94,19 @@ Compared to upstream defaults:
 - **Checks the exit code of `opkg install` / `apk add`** and exits with an error instead of printing "success"; on apk failure it prints the usual reasons (missing dependency like `yq`, unreachable repositories)
 - CDN jsDelivr mirror documented in README as fallback: `https://cdn.jsdelivr.net/gh/lanetsky/nikkiopen@main/install.sh`
 - `.github/workflows/sync-release-scripts.yml` — on push to main re-uploads `install.sh`/`uninstall.sh` to the latest release assets (keeps `/releases/latest/download/install.sh` fresh); release assets are cached by GitHub CDN for ~5 min after re-upload
-- Fallback tag: `v1.19.34-4` if API fails
+- Fallback tag: `v1.19.34-5` if API fails
 
 ## Build / Release
 
 - `.github/workflows/build-packages.yml` — matrix build for aarch64_cortex-a53 × openwrt-24.10, openwrt-25.12
 - `.github/workflows/release-packages.yml` — creates GitHub Release on tag push
 - Bump procedure: edit `PKG_VERSION` (core) or `PKG_RELEASE` in `nikki/Makefile`, commit, tag `vX.Y.Z-N`, push + push tags
+
+## Checks
+
+- **On the router**: `/etc/init.d/nikki check` (script `nikki/files/scripts/check.sh`) prints the effective settings — dashboard (`ui_path`/`ui_name`/`ui_url`), tun (`stack`), proxy modes and ports, dns, api, the counts of `proxies`/`rules`/`rule-providers` in the config the core actually loaded (`/etc/nikki/run/config.yaml`), and the state of the nft table `inet nikki` and the ip rules/routes of the tables 80/81
+- **In the app log**: every start writes a one line summary, e.g. `[Config] ui=ui/zashboard tun_stack=system mode=tproxy/tproxy redir=7891 tproxy=7892 dns=[::]:1053 api=[::]:9090`
+- **Static**: `tests/check_defaults.sh` asserts the defaults of a fresh installation (32 checks: ui_name/ui_url, tun stack, modes, ports, dns, api, routing tables, ua, log options, no `bypass_china_mainland_ip`, no gvisor). Run it after any change of `nikki/files/nikki.conf`: `sh tests/check_defaults.sh nikki/files/nikki.conf`
 
 ## Access Control
 

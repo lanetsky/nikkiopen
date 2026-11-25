@@ -10,6 +10,7 @@ PROG="/usr/bin/mihomo"
 
 extra_command 'update_subscription' 'Update subscription by section id'
 extra_command 'cleanup_leftovers' 'Remove the leftovers of a previous run'
+extra_command 'check' 'Print the effective configuration and the state of the rules'
 extra_command 'clear_logs' 'Clear logs if size exceeds the limit'
 
 boot_func() {
@@ -89,6 +90,15 @@ start_service() {
 	config_get_bool env_disable_quic_go_ecn "procd" "env_disable_quic_go_ecn" 0
 	config_get_bool env_skip_system_ipv6_check "procd" "env_skip_system_ipv6_check" 0
 	## mixin config
+	### dashboard and stack
+	local mixin_ui_path mixin_ui_name mixin_tun_stack mixin_redir_port mixin_tproxy_port mixin_dns_listen mixin_api_listen
+	config_get mixin_ui_path "mixin" "ui_path"
+	config_get mixin_ui_name "mixin" "ui_name"
+	config_get mixin_tun_stack "mixin" "tun_stack"
+	config_get mixin_redir_port "mixin" "redir_port"
+	config_get mixin_tproxy_port "mixin" "tproxy_port"
+	config_get mixin_dns_listen "mixin" "dns_listen"
+	config_get mixin_api_listen "mixin" "api_listen"
 	### overwrite
 	local overwrite_authentication overwrite_tun_dns_hijack overwrite_fake_ip_filter overwrite_hosts overwrite_dns_nameserver overwrite_dns_nameserver_policy overwrite_sniffer_sniff overwrite_sniffer_force_domain_name overwrite_sniffer_ignore_domain_name
 	config_get_bool overwrite_authentication "mixin" "authentication" 0
@@ -158,6 +168,8 @@ start_service() {
 		log "App" "Exit."
 		return
 	fi
+	# log the effective settings
+	log "Config" "ui=$mixin_ui_path/${mixin_ui_name:-NOT SET} tun_stack=$mixin_tun_stack mode=$tcp_mode/$udp_mode redir=$mixin_redir_port tproxy=$mixin_tproxy_port dns=$mixin_dns_listen api=$mixin_api_listen"
 	# mixin
 	if [ "$core_only" = 0 ]; then
 		log "Mixin" "Mixin config."
